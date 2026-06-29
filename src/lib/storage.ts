@@ -19,7 +19,7 @@ export async function uploadLineupImage(
   file: File,
   prefix: string,
 ): Promise<string> {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (!process.env.SUPABASE_SECRET_KEY) {
     return uploadLocally(file, prefix);
   }
 
@@ -52,7 +52,7 @@ export async function deleteLineupImage(url: string): Promise<void> {
     return;
   }
 
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+  if (!process.env.SUPABASE_SECRET_KEY) return;
 
   const supabase = createAdminClient();
   const marker = `/storage/v1/object/public/${BUCKET}/`;

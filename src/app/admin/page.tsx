@@ -19,6 +19,12 @@ export default async function AdminPage() {
         <div className="flex items-center gap-3">
           <AdminLogoutButton />
           <Link
+            href="/admin/lineups/import"
+            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white"
+          >
+            Import from tweet
+          </Link>
+          <Link
             href="/admin/lineups/new"
             className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-400"
           >
