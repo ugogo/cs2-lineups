@@ -9,7 +9,8 @@ export interface DownloadedTweet {
   tempDir: string;
 }
 
-function pickBestVideoUrl(
+/** Use the highest available source — lineup clips are short and quality matters for aim markers. */
+function pickDownloadVideoUrl(
   videos: { bitrate: number; url: string }[],
 ): string | null {
   if (videos.length === 0) return null;
@@ -28,7 +29,7 @@ export async function downloadTweetVideo(url: string): Promise<DownloadedTweet> 
     (media) => media.videos && media.videos.length > 0,
   );
   const videoUrl = videoMedia?.videos
-    ? pickBestVideoUrl(videoMedia.videos)
+    ? pickDownloadVideoUrl(videoMedia.videos)
     : null;
 
   if (!videoUrl) {

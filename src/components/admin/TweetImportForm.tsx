@@ -16,7 +16,7 @@ import {
 interface PreviewFrame {
   index: number;
   timestampMs: number;
-  dataUrl: string;
+  url: string;
 }
 
 interface PreviewSuggested {
@@ -30,6 +30,7 @@ interface PreviewSuggested {
 }
 
 interface PreviewResponse {
+  sessionId: string;
   tweetText: string;
   sourceUrl: string;
   suggested: PreviewSuggested;
@@ -40,15 +41,25 @@ interface TweetImportFormProps {
   maps: Map[];
 }
 
-function dataUrlToFile(dataUrl: string, filename: string): File {
-  const [header, base64] = dataUrl.split(",");
-  const mime = header.match(/:(.*?);/)?.[1] ?? "image/jpeg";
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+async function imageUrlToFile(url: string, filename: string): Promise<File> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Failed to read selected frame");
   }
-  return new File([bytes], filename, { type: mime });
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || "image/jpeg" });
+}
+
+async function cleanupSession(sessionId: string): Promise<void> {
+  try {
+    await fetch("/api/import/tweet/cleanup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    });
+  } catch {
+    // Temp files are cleaned up by the OS eventually
+  }
 }
 
 function resolveMapId(maps: Map[], slug: string | null): string {
@@ -86,7 +97,10 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       const response = await fetch("/api/import/tweet/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: tweetUrl }),
+        body: JSON.stringify({
+          url: tweetUrl,
+          previousSessionId: preview?.sessionId,
+        }),
       });
       const data = (await response.json()) as PreviewResponse & { error?: string };
 
@@ -143,9 +157,9 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       if (notes.trim()) formData.set("notes", notes.trim());
       formData.set(
         "position_image",
-        dataUrlToFile(positionFrame.dataUrl, "position.jpg"),
+        await imageUrlToFile(positionFrame.url, "position.jpg"),
       );
-      formData.set("aim_image", dataUrlToFile(aimFrame.dataUrl, "aim.jpg"));
+      formData.set("aim_image", await imageUrlToFile(aimFrame.url, "aim.jpg"));
 
       const response = await fetch("/api/lineups", { method: "POST", body: formData });
       const data = (await response.json()) as { error?: string };
@@ -153,6 +167,8 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to create lineup");
       }
+
+      void cleanupSession(preview.sessionId);
 
       router.push("/admin");
       router.refresh();

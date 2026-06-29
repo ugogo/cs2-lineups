@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export interface TimelineFrame {
   index: number;
   timestampMs: number;
-  dataUrl: string;
+  url: string;
 }
 
 interface FrameTimelinePickerProps {
@@ -107,7 +107,7 @@ export function FrameTimelinePicker({
       <div className="overflow-hidden rounded-xl border border-zinc-800 bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={currentFrame.dataUrl}
+          src={currentFrame.url}
           alt={`Preview at ${formatTime(currentFrame.timestampMs)}`}
           className="aspect-video w-full object-contain"
         />
@@ -224,8 +224,10 @@ export function FrameTimelinePicker({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={frame.dataUrl}
+                src={frame.url}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="h-14 w-24 object-cover"
               />
               <span className="absolute bottom-0 left-0 right-0 bg-black/75 px-1 py-0.5 text-center font-mono text-[9px] text-zinc-300">
@@ -302,7 +304,7 @@ function SelectionCard({
         <div className="mt-2 flex items-center gap-3">
           <div className="overflow-hidden rounded-md border border-zinc-800">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={frame.dataUrl} alt="" className="h-16 w-28 object-cover" />
+            <img src={frame.url} alt="" className="h-16 w-28 object-cover" />
           </div>
           <span className="font-mono text-sm text-zinc-300">
             {formatTime(frame.timestampMs)}
