@@ -14,11 +14,13 @@ export function LineupCard({ lineup, mapSlug }: LineupCardProps) {
       href={`/lineups/${lineup.id}`}
       className="group overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 transition hover:border-orange-500/40"
     >
-      <div className="flex aspect-video items-center justify-center overflow-hidden bg-zinc-950">
+      <div className="relative aspect-video overflow-hidden bg-zinc-950">
         <LineupImage
           src={lineup.position_image_url}
           alt={`${lineup.title} stand position`}
-          className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          fill
+          className="object-cover transition group-hover:scale-[1.02]"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>
       <div className="space-y-3 p-4">

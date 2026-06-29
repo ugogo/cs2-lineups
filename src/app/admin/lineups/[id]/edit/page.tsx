@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LineupForm } from "@/components/admin/LineupForm";
 import { getAllMaps, getLineupById } from "@/lib/queries";
@@ -6,7 +7,19 @@ interface EditLineupPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditLineupPage({ params }: EditLineupPageProps) {
+export default function EditLineupPage({ params }: EditLineupPageProps) {
+  return (
+    <Suspense fallback={<EditLineupSkeleton />}>
+      <EditLineupContent params={params} />
+    </Suspense>
+  );
+}
+
+async function EditLineupContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const [lineup, maps] = await Promise.all([getLineupById(id), getAllMaps()]);
 
@@ -35,6 +48,18 @@ export default async function EditLineupPage({ params }: EditLineupPageProps) {
           aim_image_url: lineup.aim_image_url,
         }}
       />
+    </div>
+  );
+}
+
+function EditLineupSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div>
+        <div className="h-8 w-40 rounded bg-zinc-800" />
+        <div className="mt-2 h-4 w-56 rounded bg-zinc-800/60" />
+      </div>
+      <div className="h-96 rounded-xl bg-zinc-900/40" />
     </div>
   );
 }

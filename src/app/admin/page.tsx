@@ -1,10 +1,19 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { DeleteLineupButton } from "@/components/admin/DeleteLineupButton";
 import { GrenadeBadge, SideBadge, ThrowBadge } from "@/components/Badges";
 import { getAllLineupsAdmin } from "@/lib/queries";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
-export default async function AdminPage() {
+export default function AdminPage() {
+  return (
+    <Suspense fallback={<AdminPageSkeleton />}>
+      <AdminPageContent />
+    </Suspense>
+  );
+}
+
+async function AdminPageContent() {
   const lineups = await getAllLineupsAdmin();
 
   return (
@@ -84,6 +93,24 @@ export default async function AdminPage() {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function AdminPageSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div className="h-8 w-24 rounded bg-zinc-800" />
+          <div className="mt-2 h-4 w-40 rounded bg-zinc-800/60" />
+        </div>
+        <div className="flex gap-3">
+          <div className="h-9 w-24 rounded-lg bg-zinc-800" />
+          <div className="h-9 w-28 rounded-lg bg-zinc-800" />
+        </div>
+      </div>
+      <div className="h-64 rounded-xl bg-zinc-900/40" />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
@@ -5,9 +6,19 @@ interface AdminLoginPageProps {
   searchParams: Promise<{ next?: string }>;
 }
 
-export default async function AdminLoginPage({
+export default function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
+  return (
+    <Suspense fallback={<AdminLoginSkeleton />}>
+      <AdminLoginContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function AdminLoginContent({
   searchParams,
-}: AdminLoginPageProps) {
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   const { next } = await searchParams;
 
   return (
@@ -24,6 +35,18 @@ export default async function AdminLoginPage({
           ← Back to maps
         </Link>
       </p>
+    </div>
+  );
+}
+
+function AdminLoginSkeleton() {
+  return (
+    <div className="mx-auto max-w-md space-y-6 py-12 animate-pulse">
+      <div className="text-center">
+        <div className="mx-auto h-8 w-40 rounded bg-zinc-800" />
+        <div className="mx-auto mt-2 h-4 w-56 rounded bg-zinc-800/60" />
+      </div>
+      <div className="h-32 rounded-xl bg-zinc-900/40" />
     </div>
   );
 }
