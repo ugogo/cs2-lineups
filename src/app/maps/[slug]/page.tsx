@@ -1,12 +1,25 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { LineupCard } from "@/components/LineupCard";
+import { MapLineupsView } from "@/components/MapLineupsView";
 import { getLineupsForMap, getMapBySlug } from "@/lib/queries";
 
 interface MapPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function MapPage({ params }: MapPageProps) {
+export default function MapPage({ params }: MapPageProps) {
+  return (
+    <Suspense fallback={<MapPageSkeleton />}>
+      <MapPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function MapPageContent({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const map = await getMapBySlug(slug);
 
@@ -17,28 +30,19 @@ export default async function MapPage({ params }: MapPageProps) {
   const lineups = await getLineupsForMap(map.id);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-sm text-zinc-500">de_{map.slug}</p>
-        <h1 className="text-3xl font-bold text-zinc-100">{map.name}</h1>
-        <p className="mt-2 text-zinc-400">
-          {lineups.length === 0
-            ? "No lineups saved yet. Add some from the admin panel."
-            : `${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`}
-        </p>
-      </div>
+    <MapLineupsView lineups={lineups} mapSlug={map.slug} mapName={map.name} />
+  );
+}
 
-      {lineups.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {lineups.map((lineup) => (
-            <LineupCard key={lineup.id} lineup={lineup} mapSlug={map.slug} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
-          Empty map — head to Admin to add your first lineup.
-        </div>
-      )}
+function MapPageSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div>
+        <div className="h-4 w-24 rounded bg-zinc-800/60" />
+        <div className="mt-2 h-9 w-48 rounded bg-zinc-800" />
+        <div className="mt-2 h-5 w-32 rounded bg-zinc-800/60" />
+      </div>
+      <div className="h-32 rounded-xl bg-zinc-900/40" />
     </div>
   );
 }
