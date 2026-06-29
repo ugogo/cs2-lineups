@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
-import type { LineupWithMap } from "@/lib/types";
+import type { LineupWithMap, SourceType } from "@/lib/types";
 
 export {
   getAllMaps,
@@ -18,4 +18,9 @@ export async function getAllLineupsAdmin(): Promise<LineupWithMap[]> {
 
   if (error) throw error;
   return (data ?? []) as LineupWithMap[];
+}
+
+export function parseSourceType(value: string | null): SourceType {
+  if (value === "twitter") return "twitter";
+  return "none";
 }

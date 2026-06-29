@@ -1,4 +1,4 @@
-import type { GrenadeType, ThrowMethod } from "./types";
+import type { GrenadeType, SourceType, ThrowMethod } from "./types";
 
 export const GRENADE_TYPES: GrenadeType[] = ["smoke", "flash", "molotov", "he"];
 
@@ -25,6 +25,13 @@ export const THROW_LABELS: Record<ThrowMethod, string> = {
   lmb: "Left click",
   rmb: "Right click",
   lmb_rmb: "LMB + RMB",
+};
+
+export const SOURCE_TYPES = ["none", "twitter"] as const satisfies readonly SourceType[];
+
+export const SOURCE_LABELS: Record<SourceType, string> = {
+  none: "Manual",
+  twitter: "Twitter",
 };
 
 export const SIDE_LABELS = { T: "T Side", CT: "CT Side" } as const;

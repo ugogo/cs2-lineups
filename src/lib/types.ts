@@ -8,6 +8,8 @@ export type ThrowMethod =
   | "rmb"
   | "lmb_rmb";
 
+export type SourceType = "none" | "twitter";
+
 export interface Map {
   id: string;
   name: string;
@@ -26,6 +28,8 @@ export interface Lineup {
   aim_image_url: string;
   notes: string | null;
   site: string | null;
+  source_type: SourceType;
+  source_url: string | null;
   created_at: string;
 }
 

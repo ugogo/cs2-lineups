@@ -20,6 +20,8 @@ export type Database = {
           position_image_url: string;
           side: string;
           site: string | null;
+          source_type: string;
+          source_url: string | null;
           throw_method: string;
           title: string;
         };
@@ -33,6 +35,8 @@ export type Database = {
           position_image_url: string;
           side: string;
           site?: string | null;
+          source_type?: string;
+          source_url?: string | null;
           throw_method: string;
           title: string;
         };
@@ -46,6 +50,8 @@ export type Database = {
           position_image_url?: string;
           side?: string;
           site?: string | null;
+          source_type?: string;
+          source_url?: string | null;
           throw_method?: string;
           title?: string;
         };

@@ -1,5 +1,4 @@
 import { mkdir, rm, writeFile } from "fs/promises";
-import os from "os";
 import path from "path";
 import { TwitterDL } from "twitter-downloader";
 
@@ -18,7 +17,10 @@ function pickDownloadVideoUrl(
   return sorted[0]?.url ?? null;
 }
 
-export async function downloadTweetVideo(url: string): Promise<DownloadedTweet> {
+export async function downloadTweetVideo(
+  url: string,
+  sessionDir: string,
+): Promise<DownloadedTweet> {
   const result = await TwitterDL(url);
 
   if (result.status !== "success" || !result.result) {
@@ -36,13 +38,11 @@ export async function downloadTweetVideo(url: string): Promise<DownloadedTweet> 
     throw new Error("No video found in tweet");
   }
 
-  const tempDir = path.join(os.tmpdir(), "cs2-lineups-import", crypto.randomUUID());
-  await mkdir(tempDir, { recursive: true });
-  const videoPath = path.join(tempDir, "video.mp4");
+  await mkdir(sessionDir, { recursive: true });
+  const videoPath = path.join(sessionDir, "video.mp4");
 
   const response = await fetch(videoUrl);
   if (!response.ok) {
-    await rm(tempDir, { recursive: true, force: true });
     throw new Error("Failed to download tweet video");
   }
 
@@ -52,7 +52,7 @@ export async function downloadTweetVideo(url: string): Promise<DownloadedTweet> 
   return {
     tweetText: result.result.description,
     videoPath,
-    tempDir,
+    tempDir: sessionDir,
   };
 }
 

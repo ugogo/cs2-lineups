@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { LineupWithMap } from "@/lib/types";
+import { SOURCE_LABELS } from "@/lib/constants";
 import { GrenadeBadge, SideBadge, ThrowBadge } from "./Badges";
 import { LineupScreenshotViewer } from "./LineupScreenshotViewer";
 
@@ -30,6 +31,19 @@ export function LineupDetail({ lineup }: LineupDetailProps) {
             </span>
           )}
         </div>
+        {lineup.source_type === "twitter" && lineup.source_url && (
+          <p className="text-sm text-zinc-500">
+            Source:{" "}
+            <a
+              href={lineup.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-400 hover:text-orange-300"
+            >
+              {SOURCE_LABELS.twitter}
+            </a>
+          </p>
+        )}
       </div>
 
       <div className="space-y-4">

@@ -1,3 +1,6 @@
+import { mkdir } from "fs/promises";
+import { randomUUID } from "crypto";
+import path from "path";
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { checkImportTools, IMPORT_TOOLS_ERROR } from "@/lib/import/check-tools";
@@ -6,11 +9,16 @@ import { extractFrames } from "@/lib/import/extract-frames";
 import {
   cleanupImportSession,
   frameUrl,
+  getSessionDir,
   getSessionFramesDir,
+  IMPORT_ROOT,
 } from "@/lib/import/import-session";
 import { parseTweetText } from "@/lib/import/parse-tweet-text";
+import {
+  copyTweetCacheToSession,
+  writeTweetCache,
+} from "@/lib/import/tweet-cache";
 import { normalizeTweetUrl, parseTweetUrl } from "@/lib/import/validate-tweet-url";
-import path from "path";
 
 export async function POST(request: Request) {
   if (!(await isAuthenticated())) {
@@ -30,7 +38,8 @@ export async function POST(request: Request) {
   }
 
   const url = body.url?.trim();
-  if (!url || !parseTweetUrl(url).valid) {
+  const parsed = url ? parseTweetUrl(url) : { valid: false as const };
+  if (!url || !parsed.valid) {
     return NextResponse.json(
       { error: "Invalid tweet URL. Use a link like https://x.com/user/status/123" },
       { status: 400 },
@@ -43,15 +52,41 @@ export async function POST(request: Request) {
 
   const sourceUrl = normalizeTweetUrl(url);
 
+  const sessionId = randomUUID();
+  const sessionDir = getSessionDir(sessionId);
+  if (!sessionDir) {
+    return NextResponse.json({ error: "Failed to create import session" }, { status: 500 });
+  }
+
+  await mkdir(path.join(IMPORT_ROOT), { recursive: true });
+  await mkdir(sessionDir, { recursive: true });
+
   try {
-    const downloaded = await downloadTweetVideo(sourceUrl);
-    const sessionId = path.basename(downloaded.tempDir);
     const framesDir = getSessionFramesDir(sessionId);
     if (!framesDir) {
       throw new Error("Failed to create import session");
     }
 
-    const frames = await extractFrames(downloaded.videoPath, framesDir);
+    let tweetText: string;
+    let frames;
+
+    const cached = await copyTweetCacheToSession(parsed.statusId, sessionDir);
+    if (cached) {
+      tweetText = cached.tweetText;
+      frames = cached.frames;
+    } else {
+      const downloaded = await downloadTweetVideo(sourceUrl, sessionDir);
+      tweetText = downloaded.tweetText;
+      frames = await extractFrames(downloaded.videoPath, framesDir);
+      await writeTweetCache(
+        parsed.statusId,
+        tweetText,
+        downloaded.videoPath,
+        framesDir,
+        frames,
+      );
+    }
+
     if (frames.length === 0) {
       await cleanupImportSession(sessionId);
       return NextResponse.json(
@@ -60,13 +95,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const suggested = parseTweetText(downloaded.tweetText);
+    const suggested = parseTweetText(tweetText);
 
     return NextResponse.json({
       sessionId,
-      tweetText: downloaded.tweetText,
+      tweetText,
       sourceUrl,
       suggested,
+      cached: cached !== null,
       frames: frames.map((frame) => ({
         index: frame.index,
         timestampMs: frame.timestampMs,
@@ -74,6 +110,7 @@ export async function POST(request: Request) {
       })),
     });
   } catch (err) {
+    await cleanupImportSession(sessionId);
     const message = err instanceof Error ? err.message : "Failed to import tweet";
     return NextResponse.json({ error: message }, { status: 500 });
   }

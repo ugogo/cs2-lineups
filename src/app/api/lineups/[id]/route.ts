@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
+import { revalidateLineupCaches } from "@/lib/cache-tags";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { deleteLineupImage, uploadLineupImage } from "@/lib/storage";
 import type { GrenadeType, Side, ThrowMethod } from "@/lib/types";
@@ -70,6 +71,22 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const { data: map } = await supabase
+      .from("maps")
+      .select("slug")
+      .eq("id", map_id)
+      .maybeSingle();
+
+    revalidateLineupCaches({
+      lineupId: id,
+      mapId: map_id,
+      mapSlug: map?.slug,
+    });
+
+    if (existing.map_id !== map_id) {
+      revalidateLineupCaches({ mapId: existing.map_id });
+    }
+
     return NextResponse.json({ id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update lineup";
@@ -88,7 +105,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     const supabase = createAdminClient();
     const { data: existing, error: fetchError } = await supabase
       .from("lineups")
-      .select("*")
+      .select("*, maps(slug)")
       .eq("id", id)
       .single();
 
@@ -106,6 +123,12 @@ export async function DELETE(_request: Request, context: RouteContext) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidateLineupCaches({
+      lineupId: id,
+      mapId: existing.map_id,
+      mapSlug: (existing.maps as { slug: string } | null)?.slug,
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

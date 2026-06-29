@@ -34,6 +34,7 @@ interface PreviewResponse {
   tweetText: string;
   sourceUrl: string;
   suggested: PreviewSuggested;
+  cached?: boolean;
   frames: PreviewFrame[];
 }
 
@@ -102,7 +103,9 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
           previousSessionId: preview?.sessionId,
         }),
       });
-      const data = (await response.json()) as PreviewResponse & { error?: string };
+      const data = (await response.json()) as PreviewResponse & {
+        error?: string;
+      };
 
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to fetch tweet preview");
@@ -115,11 +118,7 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       setSide(data.suggested.side);
       setThrowMethod(data.suggested.throw_method);
       setSite(data.suggested.site ?? "");
-      setNotes(
-        data.suggested.notes
-          ? `${data.suggested.notes}\n\nSource: ${data.sourceUrl}`
-          : `Source: ${data.sourceUrl}`,
-      );
+      setNotes(data.suggested.notes ?? "");
     } catch (fetchError) {
       setError(
         fetchError instanceof Error ? fetchError.message : "Failed to fetch tweet",
@@ -155,6 +154,8 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       formData.set("throw_method", throwMethod);
       if (site.trim()) formData.set("site", site.trim());
       if (notes.trim()) formData.set("notes", notes.trim());
+      formData.set("source_type", "twitter");
+      formData.set("source_url", preview.sourceUrl);
       formData.set(
         "position_image",
         await imageUrlToFile(positionFrame.url, "position.jpg"),
@@ -209,9 +210,16 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
         <>
           {preview.tweetText && (
             <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                Tweet text
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                  Tweet text
+                </p>
+                {preview.cached && (
+                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
+                    Loaded from cache
+                  </span>
+                )}
+              </div>
               <p className="mt-2 text-sm text-zinc-300">{preview.tweetText}</p>
             </section>
           )}
