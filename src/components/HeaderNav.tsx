@@ -48,6 +48,16 @@ export function HeaderNav() {
           </Link>
           <HeaderBreadcrumb pathname={pathname} />
         </div>
+        <div className="flex items-center gap-1">
+        <Link
+          href="/collections"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "font-mono text-xs uppercase tracking-wide",
+          )}
+        >
+          Packs
+        </Link>
         <Link
           href="/admin"
           aria-label="Admin"
@@ -55,6 +65,7 @@ export function HeaderNav() {
         >
           <Settings className="size-4" />
         </Link>
+        </div>
       </div>
     </header>
   );

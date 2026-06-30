@@ -8,7 +8,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import type { GrenadeType, Map, Side, ThrowMethod } from "@/lib/types";
+import { TagPicker } from "@/components/admin/TagPicker";
+import type { GrenadeType, LineupTag, Map, Side, ThrowMethod } from "@/lib/types";
 import {
   GRENADE_LABELS,
   GRENADE_TYPES,
@@ -28,6 +29,7 @@ interface LineupFormProps {
     throw_method: ThrowMethod;
     notes: string | null;
     site: string | null;
+    tags?: LineupTag[];
     position_image_url: string;
     aim_image_url: string;
   };
@@ -171,6 +173,8 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
           placeholder="Align crosshair with corner of the box..."
         />
       </Field>
+
+      <TagPicker defaultTags={initial?.tags} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ImageField

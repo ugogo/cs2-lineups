@@ -44,6 +44,7 @@ async function EditLineupContent({
           throw_method: lineup.throw_method,
           notes: lineup.notes,
           site: lineup.site,
+          tags: lineup.tags,
           position_image_url: lineup.position_image_url,
           aim_image_url: lineup.aim_image_url,
         }}

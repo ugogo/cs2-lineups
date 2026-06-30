@@ -1,12 +1,27 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { parseLineupTags } from "@/lib/lineup-tags";
 import { createServerClient } from "@/lib/supabase/server";
-import type { Map, Lineup, LineupWithMap } from "@/lib/types";
+import type {
+  Collection,
+  CollectionSummary,
+  CollectionWithLineups,
+  Map,
+  Lineup,
+  LineupWithMap,
+} from "@/lib/types";
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60;
 
 function lineupCacheLife(): void {
   cacheLife({ revalidate: THIRTY_DAYS, expire: THIRTY_DAYS });
+}
+
+function normalizeLineup<T extends Lineup>(lineup: T): T {
+  return {
+    ...lineup,
+    tags: parseLineupTags(lineup.tags ?? []),
+  };
 }
 
 export async function getMapsWithCounts(): Promise<
@@ -79,7 +94,7 @@ export async function getMapWithLineupsBySlug(
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
-  return { map: mapRow as Map, lineups: lineups as Lineup[] };
+  return { map: mapRow as Map, lineups: (lineups as Lineup[]).map(normalizeLineup) };
 }
 
 export async function getLineupsForMap(mapId: string): Promise<Lineup[]> {
@@ -95,7 +110,7 @@ export async function getLineupsForMap(mapId: string): Promise<Lineup[]> {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map(normalizeLineup);
 }
 
 export async function getLineupById(id: string): Promise<LineupWithMap | null> {
@@ -111,7 +126,8 @@ export async function getLineupById(id: string): Promise<LineupWithMap | null> {
     .maybeSingle();
 
   if (error) throw error;
-  return data as LineupWithMap | null;
+  if (!data) return null;
+  return normalizeLineup(data as LineupWithMap);
 }
 
 export async function getAllMaps(): Promise<Map[]> {
@@ -142,7 +158,69 @@ export async function getRecentLineups(limit = 6): Promise<LineupWithMap[]> {
     .limit(limit);
 
   if (error) throw error;
-  return (data ?? []) as LineupWithMap[];
+  return (data ?? []).map((lineup) => normalizeLineup(lineup as LineupWithMap));
+}
+
+export async function getCollectionsWithCounts(): Promise<CollectionSummary[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.collections);
+  lineupCacheLife();
+
+  const supabase = createServerClient();
+  const [
+    { data: collections, error: collectionsError },
+    { data: memberships, error: membershipsError },
+  ] = await Promise.all([
+    supabase.from("collections").select("*").order("created_at", { ascending: false }),
+    supabase.from("collection_lineups").select("collection_id"),
+  ]);
+
+  if (collectionsError) throw collectionsError;
+  if (membershipsError) throw membershipsError;
+
+  const counts = new globalThis.Map<string, number>();
+  for (const row of memberships ?? []) {
+    counts.set(
+      row.collection_id,
+      (counts.get(row.collection_id) ?? 0) + 1,
+    );
+  }
+
+  return (collections ?? []).map((collection) => ({
+    ...(collection as Collection),
+    lineup_count: counts.get(collection.id) ?? 0,
+  }));
+}
+
+export async function getCollectionBySlug(
+  slug: string,
+): Promise<CollectionWithLineups | null> {
+  "use cache";
+  cacheTag(CACHE_TAGS.collections, CACHE_TAGS.collection(slug), CACHE_TAGS.lineups);
+  lineupCacheLife();
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("collections")
+    .select(
+      "*, collection_lineups(sort_order, lineups(*, maps(*)))",
+    )
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  const { collection_lineups: nestedMemberships, ...collectionRow } = data;
+  const lineups = [...(nestedMemberships ?? [])]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((membership) => normalizeLineup(membership.lineups as LineupWithMap))
+    .filter(Boolean);
+
+  return {
+    ...(collectionRow as Collection),
+    lineups,
+  };
 }
 
 export async function getTotalLineupCount(): Promise<number> {

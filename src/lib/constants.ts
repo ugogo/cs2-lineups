@@ -1,4 +1,4 @@
-import type { GrenadeType, SourceType, ThrowMethod } from "./types";
+import type { GrenadeType, LineupTag, SourceType, ThrowMethod } from "./types";
 
 export const GRENADE_TYPES: GrenadeType[] = ["smoke", "flash", "molotov", "he"];
 
@@ -35,6 +35,22 @@ export const SOURCE_LABELS: Record<SourceType, string> = {
 };
 
 export const SIDE_LABELS = { T: "T Side", CT: "CT Side" } as const;
+
+export const LINEUP_TAGS: LineupTag[] = [
+  "execute",
+  "retake",
+  "one_way",
+  "pop",
+  "default",
+];
+
+export const LINEUP_TAG_LABELS: Record<LineupTag, string> = {
+  execute: "Execute",
+  retake: "Retake",
+  one_way: "One-way",
+  pop: "Pop flash",
+  default: "Default",
+};
 
 /** Matches `main` layout: `max-w-7xl` (1280px) with `px-4` horizontal padding. */
 export const MAIN_CONTENT_IMAGE_SIZES =

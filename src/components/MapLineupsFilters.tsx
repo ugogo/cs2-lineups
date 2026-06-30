@@ -15,6 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   GRENADE_LABELS,
   GRENADE_TYPES,
+  LINEUP_TAG_LABELS,
   SIDE_LABELS,
   THROW_LABELS,
   THROW_METHODS,
@@ -24,18 +25,19 @@ import {
   SIDE_FILTER_ACTIVE_CLASS,
 } from "@/lib/grenade-styles";
 import { parseLineupFilters } from "@/lib/lineup-filters";
-import type { GrenadeType, Side, ThrowMethod } from "@/lib/types";
+import type { GrenadeType, LineupTag, Side, ThrowMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface MapLineupsFiltersProps {
   mapSlug: string;
   sites: string[];
+  tags: LineupTag[];
 }
 
 const FILTER_TOGGLE_CLASS =
   "min-h-11 border border-border/60 bg-card/50 px-3 data-[state=on]:border-transparent";
 
-export function MapLineupsFilters({ mapSlug, sites }: MapLineupsFiltersProps) {
+export function MapLineupsFilters({ mapSlug, sites, tags }: MapLineupsFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filters = parseLineupFilters(searchParams);
@@ -70,7 +72,8 @@ export function MapLineupsFilters({ mapSlug, sites }: MapLineupsFiltersProps) {
     filters.grenade !== null ||
     filters.side !== null ||
     filters.throw !== null ||
-    filters.site !== null;
+    filters.site !== null ||
+    filters.tag !== null;
 
   return (
     <div className="sticky top-12 z-30 -mx-4 border-b border-border/50 bg-background/90 px-4 py-3 backdrop-blur-md">
@@ -152,6 +155,33 @@ export function MapLineupsFilters({ mapSlug, sites }: MapLineupsFiltersProps) {
               </ToggleGroup>
             </>
           )}
+
+          {tags.length > 0 && (
+            <>
+              <div className="hidden h-8 w-px bg-border/60 sm:block" aria-hidden="true" />
+              <ToggleGroup
+                value={filters.tag ? [filters.tag] : []}
+                onValueChange={(values) => {
+                  const next = values.at(-1) as LineupTag | undefined;
+                  setFilter("tag", next ?? null);
+                }}
+                className="flex flex-wrap gap-1.5"
+              >
+                {tags.map((tag) => (
+                  <ToggleGroupItem
+                    key={tag}
+                    value={tag}
+                    className={cn(
+                      "font-mono text-xs data-[state=on]:bg-primary/20 data-[state=on]:text-primary",
+                      FILTER_TOGGLE_CLASS,
+                    )}
+                  >
+                    {LINEUP_TAG_LABELS[tag]}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </>
+          )}
         </div>
 
         <Collapsible open={throwFiltersOpen} onOpenChange={setThrowFiltersOpen}>
@@ -219,6 +249,12 @@ export function MapLineupsFilters({ mapSlug, sites }: MapLineupsFiltersProps) {
               <ActiveFilterChip
                 label={filters.site}
                 onRemove={() => setFilter("site", null)}
+              />
+            )}
+            {filters.tag && (
+              <ActiveFilterChip
+                label={LINEUP_TAG_LABELS[filters.tag]}
+                onRemove={() => setFilter("tag", null)}
               />
             )}
             <Button

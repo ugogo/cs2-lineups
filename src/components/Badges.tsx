@@ -1,5 +1,5 @@
-import type { GrenadeType, ThrowMethod } from "@/lib/types";
-import { SIDE_LABELS, GRENADE_LABELS, THROW_LABELS } from "@/lib/constants";
+import type { GrenadeType, LineupTag, ThrowMethod } from "@/lib/types";
+import { LINEUP_TAG_LABELS, SIDE_LABELS, GRENADE_LABELS, THROW_LABELS } from "@/lib/constants";
 import {
   GRENADE_BADGE_CLASS,
   SIDE_BADGE_CLASS,
@@ -41,6 +41,14 @@ export function SiteBadge({ site }: { site: string }) {
   return (
     <Badge variant="outline" className="border-border/60 font-mono text-xs">
       {site}
+    </Badge>
+  );
+}
+
+export function TagBadge({ tag }: { tag: LineupTag }) {
+  return (
+    <Badge variant="outline" className="border-border/60 font-mono text-xs">
+      {LINEUP_TAG_LABELS[tag]}
     </Badge>
   );
 }

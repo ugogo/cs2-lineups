@@ -22,6 +22,7 @@ export type Database = {
           site: string | null;
           source_type: string;
           source_url: string | null;
+          tags: string[];
           throw_method: string;
           title: string;
         };
@@ -37,6 +38,7 @@ export type Database = {
           site?: string | null;
           source_type?: string;
           source_url?: string | null;
+          tags?: string[];
           throw_method: string;
           title: string;
         };
@@ -52,6 +54,7 @@ export type Database = {
           site?: string | null;
           source_type?: string;
           source_url?: string | null;
+          tags?: string[];
           throw_method?: string;
           title?: string;
         };
@@ -61,6 +64,63 @@ export type Database = {
             columns: ["map_id"];
             isOneToOne: false;
             referencedRelation: "maps";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      collections: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          slug: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          slug: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          slug?: string;
+        };
+        Relationships: [];
+      };
+      collection_lineups: {
+        Row: {
+          collection_id: string;
+          lineup_id: string;
+          sort_order: number;
+        };
+        Insert: {
+          collection_id: string;
+          lineup_id: string;
+          sort_order?: number;
+        };
+        Update: {
+          collection_id?: string;
+          lineup_id?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "collection_lineups_collection_id_fkey";
+            columns: ["collection_id"];
+            isOneToOne: false;
+            referencedRelation: "collections";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "collection_lineups_lineup_id_fkey";
+            columns: ["lineup_id"];
+            isOneToOne: false;
+            referencedRelation: "lineups";
             referencedColumns: ["id"];
           },
         ];

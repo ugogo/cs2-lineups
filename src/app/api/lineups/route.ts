@@ -4,6 +4,7 @@ import { revalidateLineupCaches } from "@/lib/cache-tags";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadLineupImage } from "@/lib/storage";
 import { normalizeTweetUrl } from "@/lib/import/validate-tweet-url";
+import { parseLineupTagsFromForm } from "@/lib/lineup-tags";
 import type { GrenadeType, Side, ThrowMethod } from "@/lib/types";
 import { parseSourceType } from "@/lib/queries";
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     const throw_method = formData.get("throw_method") as ThrowMethod;
     const notes = (formData.get("notes") as string) || null;
     const site = (formData.get("site") as string) || null;
+    const tags = parseLineupTagsFromForm(formData);
     const source_type = parseSourceType(formData.get("source_type") as string | null);
     const rawSourceUrl = (formData.get("source_url") as string) || null;
     const source_url =
@@ -65,6 +67,7 @@ export async function POST(request: Request) {
         throw_method,
         notes,
         site,
+        tags,
         source_type,
         source_url,
         position_image_url,

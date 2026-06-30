@@ -10,6 +10,7 @@ import {
   hasActiveFilters,
   parseLineupFilters,
 } from "@/lib/lineup-filters";
+import { collectTagsFromLineups } from "@/lib/lineup-tags";
 import type { Lineup } from "@/lib/types";
 
 interface MapLineupsViewProps {
@@ -38,6 +39,7 @@ export function MapLineupsView({
   const sites = [
     ...new Set(lineups.map((l) => l.site).filter(Boolean) as string[]),
   ].sort((a, b) => a.localeCompare(b));
+  const tags = collectTagsFromLineups(lineups);
   const filtered = filterLineups(lineups, filters);
   const grouped = filters.site
     ? [{ site: filters.site, lineups: filtered }]
@@ -62,7 +64,7 @@ export function MapLineupsView({
 
       {lineups.length > 0 && (
         <Suspense fallback={<MapFiltersFallback />}>
-          <MapLineupsFilters mapSlug={mapSlug} sites={sites} />
+          <MapLineupsFilters mapSlug={mapSlug} sites={sites} tags={tags} />
         </Suspense>
       )}
 

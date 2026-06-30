@@ -10,6 +10,13 @@ export type ThrowMethod =
 
 export type SourceType = "none" | "twitter";
 
+export type LineupTag =
+  | "execute"
+  | "retake"
+  | "one_way"
+  | "pop"
+  | "default";
+
 export interface Map {
   id: string;
   name: string;
@@ -28,6 +35,7 @@ export interface Lineup {
   aim_image_url: string;
   notes: string | null;
   site: string | null;
+  tags: LineupTag[];
   source_type: SourceType;
   source_url: string | null;
   created_at: string;
@@ -45,4 +53,21 @@ export interface LineupFormData {
   throw_method: ThrowMethod;
   notes?: string;
   site?: string;
+  tags?: LineupTag[];
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface CollectionWithLineups extends Collection {
+  lineups: LineupWithMap[];
+}
+
+export interface CollectionSummary extends Collection {
+  lineup_count: number;
 }

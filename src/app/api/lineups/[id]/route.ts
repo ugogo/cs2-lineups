@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { revalidateLineupCaches } from "@/lib/cache-tags";
+import { revalidateCollectionCaches, revalidateLineupCaches } from "@/lib/cache-tags";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { deleteLineupImage, uploadLineupImage } from "@/lib/storage";
+import { parseLineupTagsFromForm } from "@/lib/lineup-tags";
 import type { GrenadeType, Side, ThrowMethod } from "@/lib/types";
 
 interface RouteContext {
@@ -36,6 +37,7 @@ export async function PUT(request: Request, context: RouteContext) {
     const throw_method = formData.get("throw_method") as ThrowMethod;
     const notes = (formData.get("notes") as string) || null;
     const site = (formData.get("site") as string) || null;
+    const tags = parseLineupTagsFromForm(formData);
     const positionImage = formData.get("position_image") as File | null;
     const aimImage = formData.get("aim_image") as File | null;
 
@@ -65,6 +67,7 @@ export async function PUT(request: Request, context: RouteContext) {
         throw_method,
         notes,
         site,
+        tags,
         position_image_url,
         aim_image_url,
       })
@@ -132,6 +135,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
       mapId: existing.map_id,
       mapSlug: (existing.maps as { slug: string } | null)?.slug,
     });
+    revalidateCollectionCaches();
 
     return NextResponse.json({ ok: true });
   } catch (err) {

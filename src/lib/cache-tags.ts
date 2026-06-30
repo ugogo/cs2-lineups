@@ -5,6 +5,8 @@ export const CACHE_TAGS = {
   map: (slug: string) => `map-${slug}`,
   lineup: (id: string) => `lineup-${id}`,
   lineups: "lineups",
+  collections: "collections",
+  collection: (slug: string) => `collection-${slug}`,
 } as const;
 
 export function revalidateLineupCaches(options?: {
@@ -23,5 +25,14 @@ export function revalidateLineupCaches(options?: {
   }
   if (options?.mapId) {
     revalidateTag(`map-id-${options.mapId}`, { expire: 0 });
+  }
+}
+
+export function revalidateCollectionCaches(slug?: string): void {
+  revalidateTag(CACHE_TAGS.collections, { expire: 0 });
+  revalidateTag(CACHE_TAGS.lineups, { expire: 0 });
+
+  if (slug) {
+    revalidateTag(CACHE_TAGS.collection(slug), { expire: 0 });
   }
 }

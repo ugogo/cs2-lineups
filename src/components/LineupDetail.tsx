@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import type { LineupWithMap } from "@/lib/types";
 import { SOURCE_LABELS } from "@/lib/constants";
-import { GrenadeBadge, SideBadge, SiteBadge } from "./Badges";
+import { GrenadeBadge, SideBadge, SiteBadge, TagBadge } from "./Badges";
+import { RelatedLineups } from "./Collections";
 import { LineupBriefingViewer } from "./LineupBriefingViewer";
 import { throwLabel } from "@/lib/grenade-styles";
 import {
@@ -10,6 +11,7 @@ import {
   getAdjacentLineupIds,
   parseLineupFilters,
 } from "@/lib/lineup-filters";
+import { getRelatedLineups } from "@/lib/lineup-tags";
 import type { Lineup } from "@/lib/types";
 import {
   Breadcrumb,
@@ -49,8 +51,10 @@ export function LineupDetail({
     navigationPool,
     lineup.id,
   );
+  const relatedLineups = getRelatedLineups(lineup, mapLineups);
 
   return (
+    <div className="space-y-10">
     <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
       <aside className="order-2 space-y-6 lg:sticky lg:top-20 lg:order-1 lg:self-start">
         <Breadcrumb>
@@ -85,6 +89,9 @@ export function LineupDetail({
             <GrenadeBadge type={lineup.grenade_type} />
             <SideBadge side={lineup.side} />
             {lineup.site && <SiteBadge site={lineup.site} />}
+            {lineup.tags.map((tag) => (
+              <TagBadge key={tag} tag={tag} />
+            ))}
           </div>
           {isAdmin && (
             <Link
@@ -150,6 +157,13 @@ export function LineupDetail({
           filters={filters}
         />
       </div>
+    </div>
+
+    <RelatedLineups
+      lineups={relatedLineups}
+      mapSlug={lineup.maps.slug}
+      filters={filters}
+    />
     </div>
   );
 }

@@ -1,14 +1,16 @@
 import {
   GRENADE_TYPES,
+  LINEUP_TAGS,
   THROW_METHODS,
 } from "@/lib/constants";
-import type { GrenadeType, Lineup, Side, ThrowMethod } from "@/lib/types";
+import type { GrenadeType, Lineup, LineupTag, Side, ThrowMethod } from "@/lib/types";
 
 export interface LineupFilters {
   grenade: GrenadeType | null;
   side: Side | null;
   throw: ThrowMethod | null;
   site: string | null;
+  tag: LineupTag | null;
 }
 
 export interface SiteGroup {
@@ -35,6 +37,13 @@ export function parseThrowFilter(value: string | null): ThrowMethod | null {
     : null;
 }
 
+export function parseTagFilter(value: string | null): LineupTag | null {
+  if (!value) return null;
+  return LINEUP_TAGS.includes(value as LineupTag)
+    ? (value as LineupTag)
+    : null;
+}
+
 export function parseLineupFilters(
   params: URLSearchParams | Record<string, string | null | undefined>,
 ): LineupFilters {
@@ -51,6 +60,7 @@ export function parseLineupFilters(
     side: parseSideFilter(get("side")),
     throw: parseThrowFilter(get("throw")),
     site: get("site"),
+    tag: parseTagFilter(get("tag")),
   };
 }
 
@@ -60,6 +70,7 @@ export function filtersToSearchParams(filters: LineupFilters): URLSearchParams {
   if (filters.side) params.set("side", filters.side);
   if (filters.throw) params.set("throw", filters.throw);
   if (filters.site) params.set("site", filters.site);
+  if (filters.tag) params.set("tag", filters.tag);
   return params;
 }
 
@@ -83,6 +94,7 @@ export function filterLineups(
     if (filters.side && lineup.side !== filters.side) return false;
     if (filters.throw && lineup.throw_method !== filters.throw) return false;
     if (filters.site && lineup.site !== filters.site) return false;
+    if (filters.tag && !lineup.tags.includes(filters.tag)) return false;
     return true;
   });
 }
@@ -92,7 +104,8 @@ export function hasActiveFilters(filters: LineupFilters): boolean {
     filters.grenade !== null ||
     filters.side !== null ||
     filters.throw !== null ||
-    filters.site !== null
+    filters.site !== null ||
+    filters.tag !== null
   );
 }
 
