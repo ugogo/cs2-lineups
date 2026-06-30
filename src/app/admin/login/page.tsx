@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AdminLoginPageProps {
   searchParams: Promise<{ next?: string }>;
@@ -23,15 +24,17 @@ async function AdminLoginContent({
 
   return (
     <div className="mx-auto max-w-md space-y-6 py-12">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-zinc-100">Admin login</h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Enter your password to manage lineups.
-        </p>
-      </div>
-      <AdminLoginForm nextPath={next ?? "/admin"} />
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle>Admin login</CardTitle>
+          <CardDescription>Enter your password to manage lineups.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AdminLoginForm nextPath={next ?? "/admin"} />
+        </CardContent>
+      </Card>
       <p className="text-center">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+        <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to maps
         </Link>
       </p>
@@ -42,11 +45,7 @@ async function AdminLoginContent({
 function AdminLoginSkeleton() {
   return (
     <div className="mx-auto max-w-md space-y-6 py-12 animate-pulse">
-      <div className="text-center">
-        <div className="mx-auto h-8 w-40 rounded bg-zinc-800" />
-        <div className="mx-auto mt-2 h-4 w-56 rounded bg-zinc-800/60" />
-      </div>
-      <div className="h-32 rounded-xl bg-zinc-900/40" />
+      <div className="h-48 rounded-xl bg-muted/40" />
     </div>
   );
 }

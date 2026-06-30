@@ -1,65 +1,156 @@
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import type { LineupWithMap } from "@/lib/types";
 import { SOURCE_LABELS } from "@/lib/constants";
-import { GrenadeBadge, SideBadge, ThrowBadge } from "./Badges";
-import { LineupScreenshotViewer } from "./LineupScreenshotViewer";
+import { GrenadeBadge, SideBadge, SiteBadge } from "./Badges";
+import { LineupBriefingViewer } from "./LineupBriefingViewer";
+import { throwLabel } from "@/lib/grenade-styles";
+import {
+  filterLineups,
+  getAdjacentLineupIds,
+  parseLineupFilters,
+} from "@/lib/lineup-filters";
+import type { Lineup } from "@/lib/types";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface LineupDetailProps {
   lineup: LineupWithMap;
+  mapLineups: Lineup[];
+  searchParams: Record<string, string | string[] | undefined>;
+  isAdmin?: boolean;
 }
 
-export function LineupDetail({ lineup }: LineupDetailProps) {
+export function LineupDetail({
+  lineup,
+  mapLineups,
+  searchParams,
+  isAdmin = false,
+}: LineupDetailProps) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (typeof value === "string") params.set(key, value);
+  }
+
+  const filters = parseLineupFilters(params);
+  const filtered = filterLineups(mapLineups, filters);
+  const navigationPool =
+    filtered.some((entry) => entry.id === lineup.id) ? filtered : mapLineups;
+  const { prevId, nextId } = getAdjacentLineupIds(
+    navigationPool,
+    lineup.id,
+  );
+
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <Link
-          href={`/maps/${lineup.maps.slug}`}
-          className="text-sm text-zinc-500 hover:text-orange-400"
-        >
-          ← Back to {lineup.maps.name}
-        </Link>
-        <h1 className="text-2xl font-bold text-zinc-100 sm:text-3xl">
-          {lineup.title}
-        </h1>
-        <div className="flex flex-wrap gap-2">
-          <GrenadeBadge type={lineup.grenade_type} />
-          <SideBadge side={lineup.side} />
-          <ThrowBadge method={lineup.throw_method} />
-          {lineup.site && (
-            <span className="inline-flex rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-400 ring-1 ring-zinc-700">
-              {lineup.site}
-            </span>
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-10">
+      <aside className="order-2 space-y-6 lg:sticky lg:top-20 lg:order-1 lg:self-start">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link href="/" />}>Maps</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link href={`/maps/${lineup.maps.slug}`} />}>
+                {lineup.maps.name}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {lineup.site && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="font-mono text-xs">
+                    {lineup.site}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="space-y-3">
+          <h1 className="font-heading text-2xl uppercase leading-tight tracking-wide sm:text-3xl">
+            {lineup.title}
+          </h1>
+          <div className="flex flex-wrap gap-1.5">
+            <GrenadeBadge type={lineup.grenade_type} />
+            <SideBadge side={lineup.side} />
+            {lineup.site && <SiteBadge site={lineup.site} />}
+          </div>
+          {isAdmin && (
+            <Link
+              href={`/admin/lineups/${lineup.id}/edit`}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "gap-1.5",
+              )}
+            >
+              <Pencil className="size-3.5" aria-hidden="true" />
+              Edit lineup
+            </Link>
           )}
         </div>
-        {lineup.source_type === "twitter" && lineup.source_url && (
-          <p className="text-sm text-zinc-500">
-            Source:{" "}
-            <a
-              href={lineup.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-orange-400 hover:text-orange-300"
-            >
-              {SOURCE_LABELS.twitter}
-            </a>
-          </p>
-        )}
-      </div>
 
-      <div className="space-y-4">
-        <LineupScreenshotViewer
+        <Card size="sm" className="border-primary/20 bg-primary/5 ring-primary/10">
+          <CardContent className="space-y-1">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-primary">
+              Throw method
+            </p>
+            <p className="font-medium text-foreground">
+              {throwLabel(lineup.throw_method)}
+            </p>
+          </CardContent>
+        </Card>
+
+        {lineup.notes && (
+          <div className="space-y-2">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground">
+              Notes
+            </p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+              {lineup.notes}
+            </p>
+          </div>
+        )}
+
+        {lineup.source_type === "twitter" && lineup.source_url && (
+          <>
+            <Separator />
+            <p className="text-sm text-muted-foreground">
+              Source:{" "}
+              <a
+                href={lineup.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                {SOURCE_LABELS.twitter}
+              </a>
+            </p>
+          </>
+        )}
+      </aside>
+
+      <div className="order-1 lg:order-2">
+        <LineupBriefingViewer
           title={lineup.title}
           positionSrc={lineup.position_image_url}
           aimSrc={lineup.aim_image_url}
+          prevId={prevId}
+          nextId={nextId}
+          filters={filters}
         />
       </div>
-
-      {lineup.notes && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-          <h2 className="text-sm font-medium text-zinc-400">Notes</h2>
-          <p className="mt-2 whitespace-pre-wrap text-zinc-200">{lineup.notes}</p>
-        </div>
-      )}
     </div>
   );
 }

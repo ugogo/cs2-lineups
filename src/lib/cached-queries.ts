@@ -104,3 +104,33 @@ export async function getAllMaps(): Promise<Map[]> {
   if (error) throw error;
   return data ?? [];
 }
+
+export async function getRecentLineups(limit = 6): Promise<LineupWithMap[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.lineups);
+  lineupCacheLife();
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("lineups")
+    .select("*, maps(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []) as LineupWithMap[];
+}
+
+export async function getTotalLineupCount(): Promise<number> {
+  "use cache";
+  cacheTag(CACHE_TAGS.lineups);
+  lineupCacheLife();
+
+  const supabase = createServerClient();
+  const { count, error } = await supabase
+    .from("lineups")
+    .select("*", { count: "exact", head: true });
+
+  if (error) throw error;
+  return count ?? 0;
+}

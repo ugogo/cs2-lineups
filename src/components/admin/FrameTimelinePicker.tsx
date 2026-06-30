@@ -93,18 +93,18 @@ export function FrameTimelinePicker({
     <section className="space-y-5" onKeyDown={handleKeyDown} tabIndex={0}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-medium text-zinc-300">Frame picker</h3>
-          <p className="text-xs text-zinc-500">
+          <h3 className="text-sm font-medium text-foreground">Frame picker</h3>
+          <p className="text-xs text-muted-foreground">
             Scrub the timeline, then set stand position and aim reference. Arrow keys
             scrub; P / A set markers.
           </p>
         </div>
-        <span className="rounded-md bg-zinc-800 px-2.5 py-1 font-mono text-xs text-zinc-300">
+        <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs text-foreground">
           {formatTime(currentFrame.timestampMs)}
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-black">
+      <div className="overflow-hidden rounded-xl border border-border bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={currentFrame.url}
@@ -146,7 +146,7 @@ export function FrameTimelinePicker({
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-zinc-500">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{formatTime(frames[0]?.timestampMs ?? 0)}</span>
           <span>Timeline</span>
           <span>{formatTime(frames[frames.length - 1]?.timestampMs ?? 0)}</span>
@@ -160,9 +160,9 @@ export function FrameTimelinePicker({
           aria-valuemax={frames.length - 1}
           aria-valuenow={scrubIndex}
           onClick={handleTimelineClick}
-          className="relative h-12 cursor-pointer rounded-lg border border-zinc-800 bg-zinc-950"
+          className="relative h-12 cursor-pointer rounded-lg border border-border bg-muted"
         >
-          <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-zinc-800" />
+          <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted" />
 
           {positionFrameIndex !== null && (
             <TimelineMarker
@@ -180,7 +180,7 @@ export function FrameTimelinePicker({
           )}
 
           <div
-            className="absolute top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-orange-500 shadow-lg"
+            className="absolute top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow-lg"
             style={{ left: `${framePercent(scrubIndex, frames.length)}%` }}
           />
         </div>
@@ -191,14 +191,14 @@ export function FrameTimelinePicker({
           max={Math.max(0, frames.length - 1)}
           value={scrubIndex}
           onChange={(event) => setScrubIndex(Number(event.target.value))}
-          className="w-full accent-orange-500"
+          className="w-full accent-primary"
           aria-label="Scrub through frames"
         />
       </div>
 
       <div
         ref={filmstripRef}
-        className="flex gap-2 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 p-2"
+        className="flex gap-2 overflow-x-auto rounded-lg border border-border bg-muted p-2"
       >
         {frames.map((frame) => {
           const isScrub = frame.index === scrubIndex;
@@ -213,12 +213,12 @@ export function FrameTimelinePicker({
               onClick={() => setScrubIndex(frame.index)}
               className={`relative shrink-0 overflow-hidden rounded-md border-2 transition ${
                 isScrub
-                  ? "border-orange-500 ring-2 ring-orange-500/30"
+                  ? "border-primary ring-2 ring-primary/30"
                   : isPosition
                     ? "border-blue-500"
                     : isAim
                       ? "border-green-500"
-                      : "border-zinc-800 hover:border-zinc-600"
+                      : "border-border hover:border-border/80"
               }`}
               title={formatTime(frame.timestampMs)}
             >
@@ -230,7 +230,7 @@ export function FrameTimelinePicker({
                 decoding="async"
                 className="h-14 w-24 object-cover"
               />
-              <span className="absolute bottom-0 left-0 right-0 bg-black/75 px-1 py-0.5 text-center font-mono text-[9px] text-zinc-300">
+              <span className="absolute bottom-0 left-0 right-0 bg-black/75 px-1 py-0.5 text-center font-mono text-xs text-foreground">
                 {formatTime(frame.timestampMs)}
               </span>
               {(isPosition || isAim) && (
@@ -299,19 +299,19 @@ function SelectionCard({
 
   return (
     <div className={`rounded-lg border p-3 ${borderClass}`}>
-      <p className="text-xs font-medium text-zinc-400">{label}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {frame ? (
         <div className="mt-2 flex items-center gap-3">
-          <div className="overflow-hidden rounded-md border border-zinc-800">
+          <div className="overflow-hidden rounded-md border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={frame.url} alt="" className="h-16 w-28 object-cover" />
           </div>
-          <span className="font-mono text-sm text-zinc-300">
+          <span className="font-mono text-sm text-foreground">
             {formatTime(frame.timestampMs)}
           </span>
         </div>
       ) : (
-        <p className="mt-2 text-xs text-zinc-500">{placeholder}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{placeholder}</p>
       )}
     </div>
   );

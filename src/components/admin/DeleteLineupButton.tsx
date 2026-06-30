@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export function DeleteLineupButton({ id }: { id: string }) {
   const router = useRouter();
@@ -23,13 +24,15 @@ export function DeleteLineupButton({ id }: { id: string }) {
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleDelete}
       disabled={loading}
-      className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
+      className="text-destructive hover:text-destructive"
     >
       {loading ? "Deleting..." : "Delete"}
-    </button>
+    </Button>
   );
 }

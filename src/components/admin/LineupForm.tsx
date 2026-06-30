@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LineupImage } from "@/components/LineupImage";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { GrenadeType, Map, Side, ThrowMethod } from "@/lib/types";
 import {
   GRENADE_LABELS,
@@ -168,23 +170,16 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
           {error}
         </p>
       )}
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-400 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : initial ? "Update lineup" : "Create lineup"}
-        </button>
-        <Link
-          href="/admin"
-          className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200"
-        >
+        </Button>
+        <Link href="/admin" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
           Cancel
         </Link>
       </div>
@@ -201,7 +196,7 @@ function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-zinc-300">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
       {children}
     </label>
   );
@@ -220,9 +215,9 @@ function ImageField({
 }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-medium text-zinc-300">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
       {currentUrl && (
-        <div className="aspect-video overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
+        <div className="aspect-video overflow-hidden rounded-lg border border-border bg-muted">
           <LineupImage
             src={currentUrl}
             alt="Current screenshot"
@@ -235,10 +230,10 @@ function ImageField({
         name={name}
         accept="image/*"
         required={required}
-        className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-sm file:text-zinc-200 hover:file:bg-zinc-700"
+        className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:text-foreground hover:file:bg-muted/80"
       />
       {currentUrl && (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-muted-foreground">
           Leave empty to keep the current image.
         </p>
       )}
@@ -247,4 +242,4 @@ function ImageField({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/30";
+  "flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50";

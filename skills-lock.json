@@ -7,6 +7,18 @@
       "skillPath": "skills/deploy-to-vercel/SKILL.md",
       "computedHash": "03e0eaaa9bf13ba1e7ffa387f5893de6f324c0868c627001f179395a8feaa7c9"
     },
+    "design-system": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/design-system/SKILL.md",
+      "computedHash": "a05715299135276628f53519484e1267ec8ad111e6355a09c2da1cf66aee2cc3"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+    },
     "next-cache-components-adoption": {
       "source": "vercel/next.js",
       "sourceType": "github",
@@ -49,11 +61,29 @@
       "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
       "computedHash": "0d2c4857a7d6fdcd3fbc46e458fa4c497f029cab89a01548b3defce203003932"
     },
+    "tailwind-design-system": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "skillPath": "cli-tool/components/skills/web-development/tailwind-design-system/SKILL.md",
+      "computedHash": "e75d8fa9781628d3a203087008b6f97d4ea692586b346dd49c2d14a5aa1be95d"
+    },
     "tailwind-v4": {
       "source": "existential-birds/beagle",
       "sourceType": "github",
       "skillPath": "plugins/beagle-react/skills/tailwind-v4/SKILL.md",
       "computedHash": "0ca68c159f03933cedc4063f60b27a508562e54c237d858fe3047aab8bcb7b59"
+    },
+    "tailwindcss-accessibility": {
+      "source": "josiahsiegel/claude-plugin-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/tailwindcss-master/skills/tailwindcss-accessibility/SKILL.md",
+      "computedHash": "a942cf3362dc2aaa2edc5f1e1e07ebd1e7516e5e63aaa9cb05eab0ba6b933fa9"
+    },
+    "ui-ux-designer": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui-ux-designer/SKILL.md",
+      "computedHash": "2f0bcb6b7a81fbd31575b78a3d777d4b43fc8a2f602db46ad027dbbb6adc9a0f"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",

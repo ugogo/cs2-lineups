@@ -1,27 +1,21 @@
-import Link from "next/link";
+import { Suspense } from "react";
+import { HeaderNav } from "@/components/HeaderNav";
+
+function HeaderFallback() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4">
+        <div className="size-8 rounded-md bg-muted/50" />
+        <div className="size-7 rounded-md bg-muted/30" />
+      </div>
+    </header>
+  );
+}
 
 export function Header() {
   return (
-    <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="group flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/15 text-sm font-bold text-orange-400 ring-1 ring-orange-500/30">
-            CS
-          </span>
-          <div>
-            <p className="text-sm font-semibold text-zinc-100 group-hover:text-white">
-              CS2 Lineups
-            </p>
-            <p className="text-xs text-zinc-500">Personal nade library</p>
-          </div>
-        </Link>
-        <Link
-          href="/admin"
-          className="rounded-lg px-3 py-1.5 text-sm text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-200"
-        >
-          Admin
-        </Link>
-      </div>
-    </header>
+    <Suspense fallback={<HeaderFallback />}>
+      <HeaderNav />
+    </Suspense>
   );
 }

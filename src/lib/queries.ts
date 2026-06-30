@@ -7,6 +7,8 @@ export {
   getLineupsForMap,
   getMapBySlug,
   getMapsWithCounts,
+  getRecentLineups,
+  getTotalLineupCount,
 } from "@/lib/cached-queries";
 
 export async function getAllLineupsAdmin(): Promise<LineupWithMap[]> {

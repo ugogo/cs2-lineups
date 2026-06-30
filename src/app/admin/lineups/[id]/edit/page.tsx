@@ -30,8 +30,8 @@ async function EditLineupContent({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Edit lineup</h1>
-        <p className="mt-1 text-sm text-zinc-500">{lineup.title}</p>
+        <h1 className="text-2xl font-bold text-foreground">Edit lineup</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{lineup.title}</p>
       </div>
       <LineupForm
         maps={maps}
@@ -56,10 +56,10 @@ function EditLineupSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       <div>
-        <div className="h-8 w-40 rounded bg-zinc-800" />
-        <div className="mt-2 h-4 w-56 rounded bg-zinc-800/60" />
+        <div className="h-8 w-40 rounded bg-muted" />
+        <div className="mt-2 h-4 w-56 rounded bg-muted/60" />
       </div>
-      <div className="h-96 rounded-xl bg-zinc-900/40" />
+      <div className="h-96 rounded-xl bg-muted/40" />
     </div>
   );
 }

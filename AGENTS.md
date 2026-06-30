@@ -63,6 +63,11 @@ Project-specific skills are in [`.agents/skills/`](.agents/skills/). Load the re
 
 | Skill | Use when |
 | --- | --- |
+| `frontend-design` | Distinctive visual direction, typography, avoiding templated UI |
+| `ui-ux-designer` | UX flows, wireframes, accessibility-first interface design |
+| `design-system` | Token architecture (primitive → semantic → component), component specs |
+| `tailwind-design-system` | Tailwind theme tokens, spacing/typography scales, component variants |
+| `tailwindcss-accessibility` | WCAG compliance, focus states, screen reader patterns with Tailwind |
 | `next-cache-components-adoption` / `next-cache-components-optimizer` | Caching, PPR, Suspense, `use cache` |
 | `next-dev-loop` | Local Next.js dev workflow |
 | `supabase` / `supabase-postgres-best-practices` | Schema, queries, RLS, migrations |

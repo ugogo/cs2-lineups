@@ -2,8 +2,11 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { DeleteLineupButton } from "@/components/admin/DeleteLineupButton";
 import { GrenadeBadge, SideBadge, ThrowBadge } from "@/components/Badges";
+import { EmptyState } from "@/components/EmptyState";
 import { getAllLineupsAdmin } from "@/lib/queries";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function AdminPage() {
   return (
@@ -20,22 +23,22 @@ async function AdminPageContent() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Admin</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Admin</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your lineup library
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <AdminLogoutButton />
           <Link
             href="/admin/lineups/import"
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             Import from tweet
           </Link>
           <Link
             href="/admin/lineups/new"
-            className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-400"
+            className={cn(buttonVariants({ size: "sm" }))}
           >
             Add lineup
           </Link>
@@ -43,16 +46,20 @@ async function AdminPageContent() {
       </div>
 
       {lineups.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
-          No lineups yet.{" "}
-          <Link href="/admin/lineups/new" className="text-orange-400 hover:underline">
-            Add your first one
-          </Link>
-        </div>
+        <EmptyState
+          title="No lineups yet"
+          description={
+            <>
+              <Link href="/admin/lineups/new" className="text-primary hover:underline">
+                Add your first one
+              </Link>
+            </>
+          }
+        />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-zinc-800">
+        <div className="overflow-hidden rounded-xl border border-border ring-1 ring-foreground/5">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400">
+            <thead className="border-b border-border bg-muted/50 text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Title</th>
                 <th className="hidden px-4 py-3 font-medium sm:table-cell">Map</th>
@@ -60,27 +67,32 @@ async function AdminPageContent() {
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800">
+            <tbody className="divide-y divide-border">
               {lineups.map((lineup) => (
-                <tr key={lineup.id} className="bg-zinc-950/50">
+                <tr key={lineup.id} className="bg-card/30">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-zinc-200">{lineup.title}</p>
+                    <Link
+                      href={`/lineups/${lineup.id}`}
+                      className="font-medium text-foreground hover:text-primary hover:underline"
+                    >
+                      {lineup.title}
+                    </Link>
                     <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
                       <SideBadge side={lineup.side} />
                       <ThrowBadge method={lineup.throw_method} />
                     </div>
                   </td>
-                  <td className="hidden px-4 py-3 text-zinc-400 sm:table-cell">
+                  <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
                     {lineup.maps.name}
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <GrenadeBadge type={lineup.grenade_type} />
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                       <Link
                         href={`/admin/lineups/${lineup.id}/edit`}
-                        className="text-sm text-orange-400 hover:text-orange-300"
+                        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-primary")}
                       >
                         Edit
                       </Link>
@@ -102,15 +114,15 @@ function AdminPageSkeleton() {
     <div className="space-y-8 animate-pulse">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="h-8 w-24 rounded bg-zinc-800" />
-          <div className="mt-2 h-4 w-40 rounded bg-zinc-800/60" />
+          <div className="h-8 w-24 rounded bg-muted" />
+          <div className="mt-2 h-4 w-40 rounded bg-muted/60" />
         </div>
         <div className="flex gap-3">
-          <div className="h-9 w-24 rounded-lg bg-zinc-800" />
-          <div className="h-9 w-28 rounded-lg bg-zinc-800" />
+          <div className="h-9 w-24 rounded-lg bg-muted" />
+          <div className="h-9 w-28 rounded-lg bg-muted" />
         </div>
       </div>
-      <div className="h-64 rounded-xl bg-zinc-900/40" />
+      <div className="h-64 rounded-xl bg-muted/40" />
     </div>
   );
 }

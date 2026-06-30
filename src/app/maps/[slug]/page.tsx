@@ -36,13 +36,14 @@ async function MapPageContent({
 
 function MapPageSkeleton() {
   return (
-    <div className="space-y-8 animate-pulse">
-      <div>
-        <div className="h-4 w-24 rounded bg-zinc-800/60" />
-        <div className="mt-2 h-9 w-48 rounded bg-zinc-800" />
-        <div className="mt-2 h-5 w-32 rounded bg-zinc-800/60" />
+    <div className="space-y-6 animate-pulse">
+      <div className="h-28 rounded-xl bg-muted/50 sm:h-32" />
+      <div className="h-10 rounded-lg bg-muted/30" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="aspect-video rounded-xl bg-muted/40" />
+        <div className="aspect-video rounded-xl bg-muted/40" />
+        <div className="aspect-video rounded-xl bg-muted/40" />
       </div>
-      <div className="h-32 rounded-xl bg-zinc-900/40" />
     </div>
   );
 }

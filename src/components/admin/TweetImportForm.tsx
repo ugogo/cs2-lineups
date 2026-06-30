@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FrameTimelinePicker } from "@/components/admin/FrameTimelinePicker";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { GrenadeType, Map, Side, ThrowMethod } from "@/lib/types";
 import {
   GRENADE_LABELS,
@@ -198,7 +200,7 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
               type="button"
               onClick={handleFetch}
               disabled={fetching || !tweetUrl.trim()}
-              className="shrink-0 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-700 disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80 disabled:opacity-50"
             >
               {fetching ? "Fetching..." : "Fetch preview"}
             </button>
@@ -209,18 +211,18 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       {preview && (
         <>
           {preview.tweetText && (
-            <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+            <section className="rounded-lg border border-border bg-card/50 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Tweet text
                 </p>
                 {preview.cached && (
-                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     Loaded from cache
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-sm text-zinc-300">{preview.tweetText}</p>
+              <p className="mt-2 text-sm text-foreground">{preview.tweetText}</p>
             </section>
           )}
 
@@ -319,18 +321,10 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
           />
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={publishing}
-              className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-400 disabled:opacity-50"
-            >
+            <Button type="button" onClick={handlePublish} disabled={publishing}>
               {publishing ? "Publishing..." : "Publish lineup"}
-            </button>
-            <Link
-              href="/admin"
-              className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200"
-            >
+            </Button>
+            <Link href="/admin" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
               Cancel
             </Link>
           </div>
@@ -338,7 +332,9 @@ export function TweetImportForm({ maps }: TweetImportFormProps) {
       )}
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>
+        <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+          {error}
+        </p>
       )}
     </div>
   );
@@ -353,11 +349,11 @@ function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-zinc-300">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/30";
+  "flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50";

@@ -7,12 +7,12 @@ export default async function NewLineupPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Add lineup</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-foreground">Add lineup</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Upload your stand position and aim reference screenshots, or{" "}
           <a
             href="/admin/lineups/import"
-            className="text-orange-400 hover:underline"
+            className="text-primary hover:underline"
           >
             import from a tweet
           </a>

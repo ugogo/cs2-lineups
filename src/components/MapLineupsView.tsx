@@ -1,8 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown, X } from "lucide-react";
 import { LineupCard } from "@/components/LineupCard";
+import { MapHeroBanner } from "@/components/MapHeroBanner";
+import { EmptyState } from "@/components/EmptyState";
+import { GrenadeIcon } from "@/components/icons/GrenadeIcons";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   GRENADE_LABELS,
   GRENADE_TYPES,
@@ -10,7 +23,18 @@ import {
   THROW_LABELS,
   THROW_METHODS,
 } from "@/lib/constants";
+import {
+  GRENADE_FILTER_ACTIVE_CLASS,
+  SIDE_FILTER_ACTIVE_CLASS,
+} from "@/lib/grenade-styles";
+import {
+  filterLineups,
+  groupLineupsBySite,
+  hasActiveFilters,
+  parseLineupFilters,
+} from "@/lib/lineup-filters";
 import type { GrenadeType, Lineup, Side, ThrowMethod } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface MapLineupsViewProps {
   lineups: Lineup[];
@@ -18,63 +42,8 @@ interface MapLineupsViewProps {
   mapName: string;
 }
 
-interface ActiveFilters {
-  grenade: GrenadeType | null;
-  side: Side | null;
-  throw: ThrowMethod | null;
-  site: string | null;
-}
-
-function parseGrenade(value: string | null): GrenadeType | null {
-  if (!value) return null;
-  return GRENADE_TYPES.includes(value as GrenadeType) ? (value as GrenadeType) : null;
-}
-
-function parseSide(value: string | null): Side | null {
-  if (value === "T" || value === "CT") return value;
-  return null;
-}
-
-function parseThrow(value: string | null): ThrowMethod | null {
-  if (!value) return null;
-  return THROW_METHODS.includes(value as ThrowMethod)
-    ? (value as ThrowMethod)
-    : null;
-}
-
-function filterLineups(lineups: Lineup[], filters: ActiveFilters): Lineup[] {
-  return lineups.filter((lineup) => {
-    if (filters.grenade && lineup.grenade_type !== filters.grenade) return false;
-    if (filters.side && lineup.side !== filters.side) return false;
-    if (filters.throw && lineup.throw_method !== filters.throw) return false;
-    if (filters.site && lineup.site !== filters.site) return false;
-    return true;
-  });
-}
-
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-        active
-          ? "bg-orange-500 text-white"
-          : "bg-zinc-800 text-zinc-400 ring-1 ring-zinc-700 hover:text-zinc-200"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
+const FILTER_TOGGLE_CLASS =
+  "min-h-11 border border-border/60 bg-card/50 px-3 data-[state=on]:border-transparent";
 
 export function MapLineupsView({
   lineups,
@@ -83,13 +52,16 @@ export function MapLineupsView({
 }: MapLineupsViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const filters = parseLineupFilters(searchParams);
+  const [throwFiltersOpen, setThrowFiltersOpen] = useState(
+    () => filters.throw !== null,
+  );
 
-  const filters: ActiveFilters = {
-    grenade: parseGrenade(searchParams.get("grenade")),
-    side: parseSide(searchParams.get("side")),
-    throw: parseThrow(searchParams.get("throw")),
-    site: searchParams.get("site"),
-  };
+  useEffect(() => {
+    if (filters.throw) {
+      setThrowFiltersOpen(true);
+    }
+  }, [filters.throw]);
 
   const sites = useMemo(
     () =>
@@ -104,13 +76,24 @@ export function MapLineupsView({
     [lineups, filters],
   );
 
-  const hasActiveFilters =
-    filters.grenade !== null ||
-    filters.side !== null ||
-    filters.throw !== null ||
-    filters.site !== null;
+  const grouped = useMemo(() => {
+    if (filters.site) {
+      return [{ site: filters.site, lineups: filtered }];
+    }
+    return groupLineupsBySite(filtered);
+  }, [filtered, filters.site]);
 
-  function setFilter(key: keyof ActiveFilters, value: string | null) {
+  const active = hasActiveFilters(filters);
+  const filterQuery = searchParams.toString();
+
+  const resultMessage =
+    lineups.length === 0
+      ? "No lineups saved yet"
+      : active
+        ? `${filtered.length} of ${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`
+        : `${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`;
+
+  function setFilter(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
       params.set(key, value);
@@ -123,115 +106,237 @@ export function MapLineupsView({
     });
   }
 
-  function toggleFilter(key: keyof ActiveFilters, value: string) {
-    const current = filters[key];
-    setFilter(key, current === value ? null : value);
-  }
-
   function clearFilters() {
     router.replace(`/maps/${mapSlug}`, { scroll: false });
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-sm text-zinc-500">de_{mapSlug}</p>
-        <h1 className="text-3xl font-bold text-zinc-100">{mapName}</h1>
-        <p className="mt-2 text-zinc-400">
-          {lineups.length === 0
-            ? "No lineups saved yet. Add some from the admin panel."
-            : hasActiveFilters
-              ? `${filtered.length} of ${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`
-              : `${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`}
-        </p>
-      </div>
+    <div className="space-y-6">
+      <MapHeroBanner
+        mapSlug={mapSlug}
+        mapName={mapName}
+        lineupCount={lineups.length}
+      />
 
       {lineups.length > 0 && (
-        <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-              Filters
-            </p>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-xs text-zinc-500 hover:text-orange-400"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-
+        <div className="sticky top-12 z-30 -mx-4 border-b border-border/50 bg-background/90 px-4 py-3 backdrop-blur-md">
           <div className="space-y-3">
-            <FilterGroup label="Grenade">
-              {GRENADE_TYPES.map((type) => (
-                <FilterChip
-                  key={type}
-                  label={GRENADE_LABELS[type]}
-                  active={filters.grenade === type}
-                  onClick={() => toggleFilter("grenade", type)}
-                />
-              ))}
-            </FilterGroup>
-
-            <FilterGroup label="Side">
-              {(Object.keys(SIDE_LABELS) as Side[]).map((side) => (
-                <FilterChip
-                  key={side}
-                  label={SIDE_LABELS[side]}
-                  active={filters.side === side}
-                  onClick={() => toggleFilter("side", side)}
-                />
-              ))}
-            </FilterGroup>
-
-            <FilterGroup label="Throw">
-              {THROW_METHODS.map((method) => (
-                <FilterChip
-                  key={method}
-                  label={THROW_LABELS[method]}
-                  active={filters.throw === method}
-                  onClick={() => toggleFilter("throw", method)}
-                />
-              ))}
-            </FilterGroup>
-
-            {sites.length > 0 && (
-              <FilterGroup label="Site">
-                {sites.map((site) => (
-                  <FilterChip
-                    key={site}
-                    label={site}
-                    active={filters.site === site}
-                    onClick={() => toggleFilter("site", site)}
-                  />
+            <div className="flex flex-wrap items-center gap-2">
+              <ToggleGroup
+                value={filters.grenade ? [filters.grenade] : []}
+                onValueChange={(values) => {
+                  const next = values.at(-1) as GrenadeType | undefined;
+                  setFilter("grenade", next ?? null);
+                }}
+                className="flex flex-wrap justify-start gap-1.5"
+              >
+                {GRENADE_TYPES.map((type) => (
+                  <ToggleGroupItem
+                    key={type}
+                    value={type}
+                    aria-label={GRENADE_LABELS[type]}
+                    className={cn(
+                      "gap-1.5",
+                      FILTER_TOGGLE_CLASS,
+                      GRENADE_FILTER_ACTIVE_CLASS[type],
+                    )}
+                  >
+                    <GrenadeIcon type={type} className="size-3.5" />
+                    <span className="hidden sm:inline">{GRENADE_LABELS[type]}</span>
+                  </ToggleGroupItem>
                 ))}
-              </FilterGroup>
+              </ToggleGroup>
+
+              <Separator orientation="vertical" className="hidden h-8 sm:block" />
+
+              <ToggleGroup
+                value={filters.side ? [filters.side] : []}
+                onValueChange={(values) => {
+                  const next = values.at(-1) as Side | undefined;
+                  setFilter("side", next ?? null);
+                }}
+                className="gap-1.5"
+              >
+                {(Object.keys(SIDE_LABELS) as Side[]).map((side) => (
+                  <ToggleGroupItem
+                    key={side}
+                    value={side}
+                    className={cn(
+                      "font-mono text-xs",
+                      FILTER_TOGGLE_CLASS,
+                      SIDE_FILTER_ACTIVE_CLASS[side],
+                    )}
+                  >
+                    {side}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+
+              {sites.length > 0 && (
+                <>
+                  <Separator orientation="vertical" className="hidden h-8 sm:block" />
+                  <ToggleGroup
+                    value={filters.site ? [filters.site] : []}
+                    onValueChange={(values) => {
+                      const next = values.at(-1);
+                      setFilter("site", next ?? null);
+                    }}
+                    className="flex flex-wrap gap-1.5"
+                  >
+                    {sites.map((site) => (
+                      <ToggleGroupItem
+                        key={site}
+                        value={site}
+                        className={cn(
+                          "font-mono text-xs data-[state=on]:bg-primary/20 data-[state=on]:text-primary",
+                          FILTER_TOGGLE_CLASS,
+                        )}
+                      >
+                        {site}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </>
+              )}
+            </div>
+
+            <Collapsible open={throwFiltersOpen} onOpenChange={setThrowFiltersOpen}>
+              <CollapsibleTrigger className="flex min-h-11 items-center gap-2 rounded-lg px-2 font-mono text-xs uppercase tracking-wide text-muted-foreground transition hover:text-foreground">
+                <ChevronDown
+                  className={cn(
+                    "size-4 transition-transform",
+                    throwFiltersOpen && "rotate-180",
+                  )}
+                  aria-hidden="true"
+                />
+                Throw method
+                {filters.throw && (
+                  <Badge variant="secondary" className="font-normal normal-case">
+                    {THROW_LABELS[filters.throw]}
+                  </Badge>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <ToggleGroup
+                  value={filters.throw ? [filters.throw] : []}
+                  onValueChange={(values) => {
+                    const next = values.at(-1) as ThrowMethod | undefined;
+                    setFilter("throw", next ?? null);
+                  }}
+                  className="flex flex-wrap gap-1.5"
+                >
+                  {THROW_METHODS.map((method) => (
+                    <ToggleGroupItem
+                      key={method}
+                      value={method}
+                      className={cn(
+                        "font-mono text-xs data-[state=on]:bg-primary/20 data-[state=on]:text-primary",
+                        FILTER_TOGGLE_CLASS,
+                      )}
+                    >
+                      {THROW_LABELS[method]}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {active && (
+              <div className="flex flex-wrap items-center gap-2">
+                {filters.grenade && (
+                  <ActiveFilterChip
+                    label={GRENADE_LABELS[filters.grenade]}
+                    onRemove={() => setFilter("grenade", null)}
+                  />
+                )}
+                {filters.side && (
+                  <ActiveFilterChip
+                    label={SIDE_LABELS[filters.side]}
+                    onRemove={() => setFilter("side", null)}
+                  />
+                )}
+                {filters.throw && (
+                  <ActiveFilterChip
+                    label={THROW_LABELS[filters.throw]}
+                    onRemove={() => setFilter("throw", null)}
+                  />
+                )}
+                {filters.site && (
+                  <ActiveFilterChip
+                    label={filters.site}
+                    onRemove={() => setFilter("site", null)}
+                  />
+                )}
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={clearFilters}
+                  className="min-h-11 text-muted-foreground"
+                >
+                  Clear all
+                </Button>
+              </div>
             )}
           </div>
         </div>
       )}
 
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="font-mono text-xs text-muted-foreground"
+      >
+        {resultMessage}
+      </p>
+
       {lineups.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
-          Empty map — head to Admin to add your first lineup.
-        </div>
+        <EmptyState
+          title="Empty map"
+          description="Head to Admin to add your first lineup."
+        />
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
-          No lineups match these filters.{" "}
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="text-orange-400 hover:underline"
-          >
-            Clear filters
-          </button>
-        </div>
+        <EmptyState
+          title="No matches"
+          description={
+            <>
+              No lineups match these filters.{" "}
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            </>
+          }
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((lineup) => (
-            <LineupCard key={lineup.id} lineup={lineup} mapSlug={mapSlug} />
+        <div className="space-y-10 scroll-mt-36">
+          {grouped.map((group) => (
+            <section key={group.site} className="space-y-4">
+              {!filters.site && grouped.length > 1 && (
+                <div className="flex items-center gap-3">
+                  <h2 className="font-heading text-sm uppercase tracking-[0.15em] text-muted-foreground">
+                    {group.site}
+                  </h2>
+                  <div className="h-px flex-1 bg-border/60" />
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {group.lineups.length}
+                  </span>
+                </div>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
+                {group.lineups.map((lineup) => (
+                  <LineupCard
+                    key={lineup.id}
+                    lineup={lineup}
+                    mapSlug={mapSlug}
+                    filterQuery={filterQuery}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
@@ -239,17 +344,24 @@ export function MapLineupsView({
   );
 }
 
-function FilterGroup({
+function ActiveFilterChip({
   label,
-  children,
+  onRemove,
 }: {
   label: string;
-  children: React.ReactNode;
+  onRemove: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="w-16 shrink-0 text-xs text-zinc-600">{label}</span>
-      <div className="flex flex-wrap gap-2">{children}</div>
-    </div>
+    <Badge variant="secondary" className="gap-1 pr-1 font-normal">
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="min-h-6 min-w-6 rounded-full p-0.5 hover:bg-muted"
+        aria-label={`Remove ${label} filter`}
+      >
+        <X className="size-3" />
+      </button>
+    </Badge>
   );
 }

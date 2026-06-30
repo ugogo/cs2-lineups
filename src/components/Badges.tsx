@@ -1,41 +1,46 @@
 import type { GrenadeType, ThrowMethod } from "@/lib/types";
-import { GRENADE_LABELS, THROW_LABELS } from "@/lib/constants";
-
-const GRENADE_STYLES: Record<GrenadeType, string> = {
-  smoke: "bg-slate-500/20 text-slate-300 ring-slate-500/30",
-  flash: "bg-yellow-500/20 text-yellow-300 ring-yellow-500/30",
-  molotov: "bg-orange-500/20 text-orange-300 ring-orange-500/30",
-  he: "bg-red-500/20 text-red-300 ring-red-500/30",
-};
+import { SIDE_LABELS, GRENADE_LABELS, THROW_LABELS } from "@/lib/constants";
+import {
+  GRENADE_BADGE_CLASS,
+  SIDE_BADGE_CLASS,
+} from "@/lib/grenade-styles";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export function GrenadeBadge({ type }: { type: GrenadeType }) {
   return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${GRENADE_STYLES[type]}`}
+    <Badge
+      variant="outline"
+      className={cn("border", GRENADE_BADGE_CLASS[type])}
     >
       {GRENADE_LABELS[type]}
-    </span>
+    </Badge>
   );
 }
 
 export function ThrowBadge({ method }: { method: ThrowMethod }) {
   return (
-    <span className="inline-flex rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-300 ring-1 ring-zinc-700">
+    <Badge variant="outline" className="border-border/60 font-mono text-[11px]">
       {THROW_LABELS[method]}
-    </span>
+    </Badge>
   );
 }
 
 export function SideBadge({ side }: { side: "T" | "CT" }) {
   return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${
-        side === "T"
-          ? "bg-amber-500/15 text-amber-300 ring-amber-500/30"
-          : "bg-sky-500/15 text-sky-300 ring-sky-500/30"
-      }`}
+    <Badge
+      variant="outline"
+      className={cn("border", SIDE_BADGE_CLASS[side])}
     >
-      {side} Side
-    </span>
+      {SIDE_LABELS[side]}
+    </Badge>
+  );
+}
+
+export function SiteBadge({ site }: { site: string }) {
+  return (
+    <Badge variant="outline" className="border-border/60 font-mono text-[11px]">
+      {site}
+    </Badge>
   );
 }
