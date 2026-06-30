@@ -1,7 +1,7 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { MAP_CARD_IMAGE_SIZES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { getMapTheme, hasMapPosterAsset } from "@/lib/map-theme";
 import type { Map } from "@/lib/types";
@@ -33,11 +33,12 @@ export function MapPosterCard({ map }: MapPosterCardProps) {
           )}
         />
         {showImage && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={theme.imagePath}
             alt=""
-            className="absolute inset-0 size-full object-cover opacity-60 transition duration-500 group-hover:scale-105 group-hover:opacity-75 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            fill
+            sizes={MAP_CARD_IMAGE_SIZES}
+            className="object-cover opacity-60 transition duration-500 group-hover:scale-105 group-hover:opacity-75 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />

@@ -1,18 +1,18 @@
 import { MapGrid } from "@/components/MapGrid";
 import { FeaturedLineupBanner } from "@/components/FeaturedLineupBanner";
 import { RecentLineupsStrip } from "@/components/RecentLineupsStrip";
-import { Separator } from "@/components/ui/separator";
-import { getMapsWithCounts, getRecentLineups, getTotalLineupCount } from "@/lib/queries";
+import { getMapsWithCounts, getRecentLineups } from "@/lib/queries";
 import { ACTIVE_DUTY_MAPS } from "@/lib/constants";
 
 export default async function HomePage() {
-  const [maps, recentLineups, totalLineups] = await Promise.all([
+  const [maps, recentLineups] = await Promise.all([
     getMapsWithCounts(),
     getRecentLineups(6),
-    getTotalLineupCount(),
   ]);
 
+  const totalLineups = maps.reduce((sum, map) => sum + map.lineup_count, 0);
   const featured = recentLineups[0] ?? null;
+  const stripLineups = featured ? recentLineups.slice(1) : recentLineups;
 
   return (
     <div className="space-y-10">
@@ -33,10 +33,10 @@ export default async function HomePage() {
 
       <MapGrid maps={maps} />
 
-      {recentLineups.length > 0 && (
+      {stripLineups.length > 0 && (
         <>
-          <Separator className="bg-border/50" />
-          <RecentLineupsStrip lineups={recentLineups} />
+          <div className="h-px bg-border/50" aria-hidden="true" />
+          <RecentLineupsStrip lineups={stripLineups} />
         </>
       )}
     </div>

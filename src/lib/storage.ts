@@ -1,14 +1,13 @@
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { optimizeLineupImage } from "@/lib/optimize-lineup-image";
 import { createAdminClient } from "./supabase/admin";
 
 const BUCKET = "lineups";
+const WEBP_CONTENT_TYPE = "image/webp";
 
-async function uploadLocally(file: File, prefix: string): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const filename = `${prefix}-${crypto.randomUUID()}.${ext}`;
+async function uploadLocally(buffer: Buffer, prefix: string): Promise<string> {
+  const filename = `${prefix}-${crypto.randomUUID()}.webp`;
   const dir = path.join(process.cwd(), "public", "uploads");
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, filename), buffer);
@@ -19,16 +18,17 @@ export async function uploadLineupImage(
   file: File,
   prefix: string,
 ): Promise<string> {
+  const optimized = await optimizeLineupImage(file);
+
   if (!process.env.SUPABASE_SECRET_KEY) {
-    return uploadLocally(file, prefix);
+    return uploadLocally(optimized, prefix);
   }
 
   const supabase = createAdminClient();
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const objectPath = `${prefix}/${crypto.randomUUID()}.${ext}`;
+  const objectPath = `${prefix}/${crypto.randomUUID()}.webp`;
 
-  const { error } = await supabase.storage.from(BUCKET).upload(objectPath, file, {
-    contentType: file.type,
+  const { error } = await supabase.storage.from(BUCKET).upload(objectPath, optimized, {
+    contentType: WEBP_CONTENT_TYPE,
     upsert: false,
   });
 

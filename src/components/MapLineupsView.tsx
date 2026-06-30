@@ -1,90 +1,49 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, X } from "lucide-react";
-import { LineupCard } from "@/components/LineupCard";
-import { MapHeroBanner } from "@/components/MapHeroBanner";
+import { Suspense } from "react";
+import Link from "next/link";
 import { EmptyState } from "@/components/EmptyState";
-import { GrenadeIcon } from "@/components/icons/GrenadeIcons";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Separator } from "@/components/ui/separator";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  GRENADE_LABELS,
-  GRENADE_TYPES,
-  SIDE_LABELS,
-  THROW_LABELS,
-  THROW_METHODS,
-} from "@/lib/constants";
-import {
-  GRENADE_FILTER_ACTIVE_CLASS,
-  SIDE_FILTER_ACTIVE_CLASS,
-} from "@/lib/grenade-styles";
+import { MapHeroBanner } from "@/components/MapHeroBanner";
+import { MapLineupsFilters } from "@/components/MapLineupsFilters";
+import { MapLineupsGrid } from "@/components/MapLineupsGrid";
 import {
   filterLineups,
   groupLineupsBySite,
   hasActiveFilters,
   parseLineupFilters,
 } from "@/lib/lineup-filters";
-import type { GrenadeType, Lineup, Side, ThrowMethod } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { Lineup } from "@/lib/types";
 
 interface MapLineupsViewProps {
   lineups: Lineup[];
   mapSlug: string;
   mapName: string;
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
-const FILTER_TOGGLE_CLASS =
-  "min-h-11 border border-border/60 bg-card/50 px-3 data-[state=on]:border-transparent";
+function MapFiltersFallback() {
+  return <div className="h-24 animate-pulse rounded-lg bg-muted/30" />;
+}
 
 export function MapLineupsView({
   lineups,
   mapSlug,
   mapName,
+  searchParams,
 }: MapLineupsViewProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const filters = parseLineupFilters(searchParams);
-  const [throwFiltersOpen, setThrowFiltersOpen] = useState(
-    () => filters.throw !== null,
-  );
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (typeof value === "string") params.set(key, value);
+  }
 
-  useEffect(() => {
-    if (filters.throw) {
-      setThrowFiltersOpen(true);
-    }
-  }, [filters.throw]);
-
-  const sites = useMemo(
-    () =>
-      [...new Set(lineups.map((l) => l.site).filter(Boolean) as string[])].sort(
-        (a, b) => a.localeCompare(b),
-      ),
-    [lineups],
-  );
-
-  const filtered = useMemo(
-    () => filterLineups(lineups, filters),
-    [lineups, filters],
-  );
-
-  const grouped = useMemo(() => {
-    if (filters.site) {
-      return [{ site: filters.site, lineups: filtered }];
-    }
-    return groupLineupsBySite(filtered);
-  }, [filtered, filters.site]);
-
+  const filters = parseLineupFilters(params);
+  const sites = [
+    ...new Set(lineups.map((l) => l.site).filter(Boolean) as string[]),
+  ].sort((a, b) => a.localeCompare(b));
+  const filtered = filterLineups(lineups, filters);
+  const grouped = filters.site
+    ? [{ site: filters.site, lineups: filtered }]
+    : groupLineupsBySite(filtered);
   const active = hasActiveFilters(filters);
-  const filterQuery = searchParams.toString();
+  const filterQuery = params.toString();
 
   const resultMessage =
     lineups.length === 0
@@ -92,23 +51,6 @@ export function MapLineupsView({
       : active
         ? `${filtered.length} of ${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`
         : `${lineups.length} lineup${lineups.length === 1 ? "" : "s"}`;
-
-  function setFilter(key: string, value: string | null) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    const query = params.toString();
-    router.replace(query ? `/maps/${mapSlug}?${query}` : `/maps/${mapSlug}`, {
-      scroll: false,
-    });
-  }
-
-  function clearFilters() {
-    router.replace(`/maps/${mapSlug}`, { scroll: false });
-  }
 
   return (
     <div className="space-y-6">
@@ -119,166 +61,9 @@ export function MapLineupsView({
       />
 
       {lineups.length > 0 && (
-        <div className="sticky top-12 z-30 -mx-4 border-b border-border/50 bg-background/90 px-4 py-3 backdrop-blur-md">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <ToggleGroup
-                value={filters.grenade ? [filters.grenade] : []}
-                onValueChange={(values) => {
-                  const next = values.at(-1) as GrenadeType | undefined;
-                  setFilter("grenade", next ?? null);
-                }}
-                className="flex flex-wrap justify-start gap-1.5"
-              >
-                {GRENADE_TYPES.map((type) => (
-                  <ToggleGroupItem
-                    key={type}
-                    value={type}
-                    aria-label={GRENADE_LABELS[type]}
-                    className={cn(
-                      "gap-1.5",
-                      FILTER_TOGGLE_CLASS,
-                      GRENADE_FILTER_ACTIVE_CLASS[type],
-                    )}
-                  >
-                    <GrenadeIcon type={type} className="size-3.5" />
-                    <span className="hidden sm:inline">{GRENADE_LABELS[type]}</span>
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-
-              <Separator orientation="vertical" className="hidden h-8 sm:block" />
-
-              <ToggleGroup
-                value={filters.side ? [filters.side] : []}
-                onValueChange={(values) => {
-                  const next = values.at(-1) as Side | undefined;
-                  setFilter("side", next ?? null);
-                }}
-                className="gap-1.5"
-              >
-                {(Object.keys(SIDE_LABELS) as Side[]).map((side) => (
-                  <ToggleGroupItem
-                    key={side}
-                    value={side}
-                    className={cn(
-                      "font-mono text-xs",
-                      FILTER_TOGGLE_CLASS,
-                      SIDE_FILTER_ACTIVE_CLASS[side],
-                    )}
-                  >
-                    {side}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-
-              {sites.length > 0 && (
-                <>
-                  <Separator orientation="vertical" className="hidden h-8 sm:block" />
-                  <ToggleGroup
-                    value={filters.site ? [filters.site] : []}
-                    onValueChange={(values) => {
-                      const next = values.at(-1);
-                      setFilter("site", next ?? null);
-                    }}
-                    className="flex flex-wrap gap-1.5"
-                  >
-                    {sites.map((site) => (
-                      <ToggleGroupItem
-                        key={site}
-                        value={site}
-                        className={cn(
-                          "font-mono text-xs data-[state=on]:bg-primary/20 data-[state=on]:text-primary",
-                          FILTER_TOGGLE_CLASS,
-                        )}
-                      >
-                        {site}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </>
-              )}
-            </div>
-
-            <Collapsible open={throwFiltersOpen} onOpenChange={setThrowFiltersOpen}>
-              <CollapsibleTrigger className="flex min-h-11 items-center gap-2 rounded-lg px-2 font-mono text-xs uppercase tracking-wide text-muted-foreground transition hover:text-foreground">
-                <ChevronDown
-                  className={cn(
-                    "size-4 transition-transform",
-                    throwFiltersOpen && "rotate-180",
-                  )}
-                  aria-hidden="true"
-                />
-                Throw method
-                {filters.throw && (
-                  <Badge variant="secondary" className="font-normal normal-case">
-                    {THROW_LABELS[filters.throw]}
-                  </Badge>
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <ToggleGroup
-                  value={filters.throw ? [filters.throw] : []}
-                  onValueChange={(values) => {
-                    const next = values.at(-1) as ThrowMethod | undefined;
-                    setFilter("throw", next ?? null);
-                  }}
-                  className="flex flex-wrap gap-1.5"
-                >
-                  {THROW_METHODS.map((method) => (
-                    <ToggleGroupItem
-                      key={method}
-                      value={method}
-                      className={cn(
-                        "font-mono text-xs data-[state=on]:bg-primary/20 data-[state=on]:text-primary",
-                        FILTER_TOGGLE_CLASS,
-                      )}
-                    >
-                      {THROW_LABELS[method]}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {active && (
-              <div className="flex flex-wrap items-center gap-2">
-                {filters.grenade && (
-                  <ActiveFilterChip
-                    label={GRENADE_LABELS[filters.grenade]}
-                    onRemove={() => setFilter("grenade", null)}
-                  />
-                )}
-                {filters.side && (
-                  <ActiveFilterChip
-                    label={SIDE_LABELS[filters.side]}
-                    onRemove={() => setFilter("side", null)}
-                  />
-                )}
-                {filters.throw && (
-                  <ActiveFilterChip
-                    label={THROW_LABELS[filters.throw]}
-                    onRemove={() => setFilter("throw", null)}
-                  />
-                )}
-                {filters.site && (
-                  <ActiveFilterChip
-                    label={filters.site}
-                    onRemove={() => setFilter("site", null)}
-                  />
-                )}
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={clearFilters}
-                  className="min-h-11 text-muted-foreground"
-                >
-                  Clear all
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <Suspense fallback={<MapFiltersFallback />}>
+          <MapLineupsFilters mapSlug={mapSlug} sites={sites} />
+        </Suspense>
       )}
 
       <p
@@ -301,67 +86,20 @@ export function MapLineupsView({
           description={
             <>
               No lineups match these filters.{" "}
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-primary hover:underline"
-              >
+              <Link href={`/maps/${mapSlug}`} className="text-primary hover:underline">
                 Clear filters
-              </button>
+              </Link>
             </>
           }
         />
       ) : (
-        <div className="space-y-10 scroll-mt-36">
-          {grouped.map((group) => (
-            <section key={group.site} className="space-y-4">
-              {!filters.site && grouped.length > 1 && (
-                <div className="flex items-center gap-3">
-                  <h2 className="font-heading text-sm uppercase tracking-[0.15em] text-muted-foreground">
-                    {group.site}
-                  </h2>
-                  <div className="h-px flex-1 bg-border/60" />
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {group.lineups.length}
-                  </span>
-                </div>
-              )}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[repeat(auto-fill,minmax(280px,1fr))]">
-                {group.lineups.map((lineup) => (
-                  <LineupCard
-                    key={lineup.id}
-                    lineup={lineup}
-                    mapSlug={mapSlug}
-                    filterQuery={filterQuery}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        <MapLineupsGrid
+          grouped={grouped}
+          mapSlug={mapSlug}
+          filterQuery={filterQuery}
+          hideSiteHeaders={filters.site !== null}
+        />
       )}
     </div>
-  );
-}
-
-function ActiveFilterChip({
-  label,
-  onRemove,
-}: {
-  label: string;
-  onRemove: () => void;
-}) {
-  return (
-    <Badge variant="secondary" className="gap-1 pr-1 font-normal">
-      {label}
-      <button
-        type="button"
-        onClick={onRemove}
-        className="min-h-6 min-w-6 rounded-full p-0.5 hover:bg-muted"
-        aria-label={`Remove ${label} filter`}
-      >
-        <X className="size-3" />
-      </button>
-    </Badge>
   );
 }

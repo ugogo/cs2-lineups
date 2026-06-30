@@ -45,6 +45,10 @@
   --color-grenade-flash: var(--grenade-flash);
   --color-grenade-molotov: var(--grenade-molotov);
   --color-grenade-he: var(--grenade-he);
+  --color-marker-position: var(--marker-position);
+  --color-marker-position-foreground: var(--marker-position-foreground);
+  --color-marker-aim: var(--marker-aim);
+  --color-marker-aim-foreground: var(--marker-aim-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -87,6 +91,16 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --side-t: oklch(0.72 0.12 75);
+  --side-ct: oklch(0.68 0.08 230);
+  --grenade-smoke: oklch(0.55 0.02 260);
+  --grenade-flash: oklch(0.78 0.14 95);
+  --grenade-molotov: oklch(0.68 0.15 45);
+  --grenade-he: oklch(0.62 0.18 25);
+  --marker-position: oklch(0.55 0.18 250);
+  --marker-position-foreground: oklch(0.98 0.01 250);
+  --marker-aim: oklch(0.62 0.17 145);
+  --marker-aim-foreground: oklch(0.98 0.01 145);
 }
 
 .dark {
@@ -127,6 +141,10 @@
   --grenade-flash: oklch(0.82 0.16 95);
   --grenade-molotov: oklch(0.72 0.17 45);
   --grenade-he: oklch(0.65 0.2 25);
+  --marker-position: oklch(0.58 0.16 250);
+  --marker-position-foreground: oklch(0.95 0.02 250);
+  --marker-aim: oklch(0.65 0.16 145);
+  --marker-aim-foreground: oklch(0.95 0.02 145);
 }
 
 @layer base {

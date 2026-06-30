@@ -44,12 +44,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const supabase = createAdminClient();
+    const mapSlugPromise = supabase
+      .from("maps")
+      .select("slug")
+      .eq("id", map_id)
+      .maybeSingle();
+
     const [position_image_url, aim_image_url] = await Promise.all([
       uploadLineupImage(positionImage, "position"),
       uploadLineupImage(aimImage, "aim"),
     ]);
-
-    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("lineups")
       .insert({
@@ -72,11 +77,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const { data: map } = await supabase
-      .from("maps")
-      .select("slug")
-      .eq("id", map_id)
-      .maybeSingle();
+    const { data: map } = await mapSlugPromise;
 
     revalidateLineupCaches({
       lineupId: data.id,

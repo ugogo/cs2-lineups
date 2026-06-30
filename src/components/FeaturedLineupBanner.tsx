@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GrenadeBadge, SideBadge } from "@/components/Badges";
 import { LineupImage } from "@/components/LineupImage";
+import { MAIN_CONTENT_IMAGE_SIZES } from "@/lib/constants";
 import { throwLabel } from "@/lib/grenade-styles";
 import type { LineupWithMap } from "@/lib/types";
 
@@ -20,7 +21,7 @@ export function FeaturedLineupBanner({ lineup }: FeaturedLineupBannerProps) {
           alt=""
           fill
           className="object-cover transition duration-500 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-          sizes="100vw"
+          sizes={MAIN_CONTENT_IMAGE_SIZES}
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-black/20" />

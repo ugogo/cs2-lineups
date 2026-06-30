@@ -36,6 +36,22 @@ export const SOURCE_LABELS: Record<SourceType, string> = {
 
 export const SIDE_LABELS = { T: "T Side", CT: "CT Side" } as const;
 
+/** Matches `main` layout: `max-w-7xl` (1280px) with `px-4` horizontal padding. */
+export const MAIN_CONTENT_IMAGE_SIZES =
+  "(max-width: 1280px) calc(100vw - 2rem), 1248px";
+
+/** Lineup detail main column below the 320px sidebar at `lg`. */
+export const LINEUP_DETAIL_IMAGE_SIZES =
+  "(max-width: 1024px) 100vw, 888px";
+
+/** Map grid poster cards (`sm:grid-cols-2`). */
+export const MAP_CARD_IMAGE_SIZES =
+  "(max-width: 640px) 100vw, 50vw";
+
+/** Lineup card thumbnails in responsive grids. */
+export const LINEUP_CARD_IMAGE_SIZES =
+  "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
+
 export const ACTIVE_DUTY_MAPS = [
   { name: "Mirage", slug: "mirage", sort_order: 1 },
   { name: "Inferno", slug: "inferno", sort_order: 2 },

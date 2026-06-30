@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       },
     ],
     minimumCacheTTL: 86_400,
+    formats: ["image/avif", "image/webp"],
   },
   serverExternalPackages: [
     "ffmpeg-static",

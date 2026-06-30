@@ -18,17 +18,15 @@ export async function getMapsWithCounts(): Promise<
 
   const supabase = createServerClient();
 
-  const { data: maps, error: mapsError } = await supabase
-    .from("maps")
-    .select("*")
-    .order("sort_order");
+  const [
+    { data: maps, error: mapsError },
+    { data: lineups, error: lineupsError },
+  ] = await Promise.all([
+    supabase.from("maps").select("*").order("sort_order"),
+    supabase.from("lineups").select("map_id"),
+  ]);
 
   if (mapsError) throw mapsError;
-
-  const { data: lineups, error: lineupsError } = await supabase
-    .from("lineups")
-    .select("map_id");
-
   if (lineupsError) throw lineupsError;
 
   const counts = new globalThis.Map<string, number>();
@@ -56,6 +54,32 @@ export async function getMapBySlug(slug: string): Promise<Map | null> {
 
   if (error) throw error;
   return data;
+}
+
+export async function getMapWithLineupsBySlug(
+  slug: string,
+): Promise<{ map: Map; lineups: Lineup[] } | null> {
+  "use cache";
+  cacheTag(CACHE_TAGS.maps, CACHE_TAGS.map(slug), CACHE_TAGS.lineups);
+  lineupCacheLife();
+
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("maps")
+    .select("*, lineups(*)")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  const { lineups: nestedLineups, ...mapRow } = data;
+  const lineups = [...(nestedLineups ?? [])].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  return { map: mapRow as Map, lineups: lineups as Lineup[] };
 }
 
 export async function getLineupsForMap(mapId: string): Promise<Lineup[]> {

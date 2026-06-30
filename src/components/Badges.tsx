@@ -20,7 +20,7 @@ export function GrenadeBadge({ type }: { type: GrenadeType }) {
 
 export function ThrowBadge({ method }: { method: ThrowMethod }) {
   return (
-    <Badge variant="outline" className="border-border/60 font-mono text-[11px]">
+    <Badge variant="outline" className="border-border/60 font-mono text-xs">
       {THROW_LABELS[method]}
     </Badge>
   );
@@ -39,7 +39,7 @@ export function SideBadge({ side }: { side: "T" | "CT" }) {
 
 export function SiteBadge({ site }: { site: string }) {
   return (
-    <Badge variant="outline" className="border-border/60 font-mono text-[11px]">
+    <Badge variant="outline" className="border-border/60 font-mono text-xs">
       {site}
     </Badge>
   );

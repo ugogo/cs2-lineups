@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { MAIN_CONTENT_IMAGE_SIZES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { getMapTheme, hasMapPosterAsset } from "@/lib/map-theme";
 
@@ -25,11 +27,12 @@ export function MapHeroBanner({
           )}
         />
         {showImage && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={theme.imagePath}
             alt=""
-            className="absolute inset-0 size-full object-cover opacity-50"
+            fill
+            sizes={MAIN_CONTENT_IMAGE_SIZES}
+            className="object-cover opacity-50"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />

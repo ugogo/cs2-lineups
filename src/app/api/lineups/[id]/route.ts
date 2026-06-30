@@ -42,15 +42,18 @@ export async function PUT(request: Request, context: RouteContext) {
     let position_image_url = existing.position_image_url;
     let aim_image_url = existing.aim_image_url;
 
-    if (positionImage?.size) {
-      await deleteLineupImage(existing.position_image_url);
-      position_image_url = await uploadLineupImage(positionImage, "position");
-    }
-
-    if (aimImage?.size) {
-      await deleteLineupImage(existing.aim_image_url);
-      aim_image_url = await uploadLineupImage(aimImage, "aim");
-    }
+    [position_image_url, aim_image_url] = await Promise.all([
+      positionImage?.size
+        ? deleteLineupImage(existing.position_image_url).then(() =>
+            uploadLineupImage(positionImage, "position"),
+          )
+        : Promise.resolve(position_image_url),
+      aimImage?.size
+        ? deleteLineupImage(existing.aim_image_url).then(() =>
+            uploadLineupImage(aimImage, "aim"),
+          )
+        : Promise.resolve(aim_image_url),
+    ]);
 
     const { error } = await supabase
       .from("lineups")

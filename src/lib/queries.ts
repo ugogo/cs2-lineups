@@ -6,6 +6,7 @@ export {
   getLineupById,
   getLineupsForMap,
   getMapBySlug,
+  getMapWithLineupsBySlug,
   getMapsWithCounts,
   getRecentLineups,
   getTotalLineupCount,

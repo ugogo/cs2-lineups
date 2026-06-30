@@ -1,6 +1,3 @@
-"use client";
-
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LineupCard } from "@/components/LineupCard";
 import type { LineupWithMap } from "@/lib/types";
 
@@ -9,7 +6,7 @@ interface RecentLineupsStripProps {
 }
 
 export function RecentLineupsStrip({ lineups }: RecentLineupsStripProps) {
-  if (lineups.length < 2) return null;
+  if (lineups.length === 0) return null;
 
   return (
     <section className="space-y-4">
@@ -31,8 +28,8 @@ export function RecentLineupsStrip({ lineups }: RecentLineupsStripProps) {
           className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent"
           aria-hidden="true"
         />
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex w-max gap-4 pb-4">
+        <div className="-mx-4 overflow-x-auto px-4 pb-4 [scrollbar-width:thin]">
+          <div className="flex w-max gap-4">
             {lineups.map((lineup) => (
               <div key={lineup.id} className="w-72 shrink-0">
                 <LineupCard
@@ -43,8 +40,7 @@ export function RecentLineupsStrip({ lineups }: RecentLineupsStripProps) {
               </div>
             ))}
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
       </div>
     </section>
   );

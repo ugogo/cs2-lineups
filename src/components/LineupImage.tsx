@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LINEUP_CARD_IMAGE_SIZES } from "@/lib/constants";
 
 interface LineupImageProps {
   src: string;
@@ -9,6 +10,10 @@ interface LineupImageProps {
   sizes?: string;
 }
 
+function isOptimizableSrc(src: string): boolean {
+  return src.startsWith("http") || src.startsWith("/");
+}
+
 export function LineupImage({
   src,
   alt,
@@ -17,9 +22,7 @@ export function LineupImage({
   priority = false,
   sizes,
 }: LineupImageProps) {
-  const isRemote = src.startsWith("http");
-
-  if (isRemote) {
+  if (isOptimizableSrc(src)) {
     return (
       <Image
         src={src}
@@ -28,8 +31,10 @@ export function LineupImage({
         width={fill ? undefined : 1280}
         height={fill ? undefined : 720}
         className={className}
-        sizes={sizes ?? "(max-width: 768px) 100vw, 50vw"}
+        sizes={sizes ?? LINEUP_CARD_IMAGE_SIZES}
         priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
       />
     );
   }
@@ -42,6 +47,7 @@ export function LineupImage({
         alt={alt}
         className={`absolute inset-0 h-full w-full ${className ?? ""}`}
         decoding="async"
+        loading={priority ? "eager" : "lazy"}
       />
     );
   }
@@ -53,6 +59,7 @@ export function LineupImage({
       alt={alt}
       className={`max-h-full max-w-full ${className ?? ""}`}
       decoding="async"
+      loading={priority ? "eager" : "lazy"}
     />
   );
 }

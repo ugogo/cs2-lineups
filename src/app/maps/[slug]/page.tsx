@@ -1,36 +1,47 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { MapLineupsView } from "@/components/MapLineupsView";
-import { getLineupsForMap, getMapBySlug } from "@/lib/queries";
+import { getMapWithLineupsBySlug } from "@/lib/queries";
 
 interface MapPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default function MapPage({ params }: MapPageProps) {
+export default function MapPage({ params, searchParams }: MapPageProps) {
   return (
     <Suspense fallback={<MapPageSkeleton />}>
-      <MapPageContent params={params} />
+      <MapPageContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
 async function MapPageContent({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { slug } = await params;
-  const map = await getMapBySlug(slug);
+  const [{ slug }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const result = await getMapWithLineupsBySlug(slug);
 
-  if (!map) {
+  if (!result) {
     notFound();
   }
 
-  const lineups = await getLineupsForMap(map.id);
+  const { map, lineups } = result;
 
   return (
-    <MapLineupsView lineups={lineups} mapSlug={map.slug} mapName={map.name} />
+    <MapLineupsView
+      lineups={lineups}
+      mapSlug={map.slug}
+      mapName={map.name}
+      searchParams={resolvedSearchParams}
+    />
   );
 }
 

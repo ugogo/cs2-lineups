@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { LineupImage } from "@/components/LineupImage";
 import { Button } from "@/components/ui/button";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 
@@ -75,14 +76,20 @@ export function ImageLightbox({
           Close
         </Button>
       </div>
-      <div className="flex flex-1 items-center justify-center p-4 pt-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          className="max-h-[85vh] max-w-[95vw] object-contain"
+      <div className="relative flex flex-1 items-center justify-center p-4 pt-0">
+        <div
+          className="relative h-[85vh] w-[95vw] max-w-full"
           onClick={(event) => event.stopPropagation()}
-        />
+        >
+          <LineupImage
+            src={src}
+            alt={alt}
+            fill
+            priority
+            sizes="95vw"
+            className="object-contain"
+          />
+        </div>
       </div>
     </div>
   );

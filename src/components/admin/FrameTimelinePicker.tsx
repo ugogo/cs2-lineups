@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export interface TimelineFrame {
   index: number;
@@ -15,6 +16,36 @@ interface FrameTimelinePickerProps {
   onPositionChange: (index: number) => void;
   onAimChange: (index: number) => void;
 }
+
+type MarkerKind = "position" | "aim";
+
+const MARKER_STYLES: Record<
+  MarkerKind,
+  {
+    actionButton: string;
+    filmstripBorder: string;
+    badge: string;
+    marker: string;
+    card: string;
+  }
+> = {
+  position: {
+    actionButton:
+      "border-marker-position/40 bg-marker-position/10 text-marker-position hover:bg-marker-position/20",
+    filmstripBorder: "border-marker-position",
+    badge: "bg-marker-position text-marker-position-foreground",
+    marker: "border-marker-position bg-marker-position text-marker-position-foreground",
+    card: "border-marker-position/30 bg-marker-position/5",
+  },
+  aim: {
+    actionButton:
+      "border-marker-aim/40 bg-marker-aim/10 text-marker-aim hover:bg-marker-aim/20",
+    filmstripBorder: "border-marker-aim",
+    badge: "bg-marker-aim text-marker-aim-foreground",
+    marker: "border-marker-aim bg-marker-aim text-marker-aim-foreground",
+    card: "border-marker-aim/30 bg-marker-aim/5",
+  },
+};
 
 function formatTime(ms: number): string {
   const totalSeconds = ms / 1000;
@@ -48,7 +79,9 @@ export function FrameTimelinePicker({
       ? frames.find((frame) => frame.index === positionFrameIndex)
       : null;
   const aimFrame =
-    aimFrameIndex !== null ? frames.find((frame) => frame.index === aimFrameIndex) : null;
+    aimFrameIndex !== null
+      ? frames.find((frame) => frame.index === aimFrameIndex)
+      : null;
 
   const scrollFilmstripToIndex = useCallback((index: number) => {
     const container = filmstripRef.current;
@@ -117,14 +150,20 @@ export function FrameTimelinePicker({
         <button
           type="button"
           onClick={() => onPositionChange(scrubIndex)}
-          className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-2 text-sm font-medium text-blue-300 transition hover:bg-blue-500/20"
+          className={cn(
+            "rounded-lg border px-3 py-2 text-sm font-medium transition",
+            MARKER_STYLES.position.actionButton,
+          )}
         >
           Set stand position here
         </button>
         <button
           type="button"
           onClick={() => onAimChange(scrubIndex)}
-          className="rounded-lg border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm font-medium text-green-300 transition hover:bg-green-500/20"
+          className={cn(
+            "rounded-lg border px-3 py-2 text-sm font-medium transition",
+            MARKER_STYLES.aim.actionButton,
+          )}
         >
           Set aim reference here
         </button>
@@ -133,15 +172,15 @@ export function FrameTimelinePicker({
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectionCard
           label="Stand position"
-          accent="blue"
+          kind="position"
           frame={positionFrame ?? null}
-          placeholder="Not set — scrub and click “Set stand position here”"
+          placeholder='Not set — scrub and click "Set stand position here"'
         />
         <SelectionCard
           label="Aim reference"
-          accent="green"
+          kind="aim"
           frame={aimFrame ?? null}
-          placeholder="Not set — scrub and click “Set aim reference here”"
+          placeholder='Not set — scrub and click "Set aim reference here"'
         />
       </div>
 
@@ -167,14 +206,14 @@ export function FrameTimelinePicker({
           {positionFrameIndex !== null && (
             <TimelineMarker
               percent={framePercent(positionFrameIndex, frames.length)}
-              color="blue"
+              kind="position"
               label="Pos"
             />
           )}
           {aimFrameIndex !== null && (
             <TimelineMarker
               percent={framePercent(aimFrameIndex, frames.length)}
-              color="green"
+              kind="aim"
               label="Aim"
             />
           )}
@@ -211,15 +250,16 @@ export function FrameTimelinePicker({
               type="button"
               data-frame-index={frame.index}
               onClick={() => setScrubIndex(frame.index)}
-              className={`relative shrink-0 overflow-hidden rounded-md border-2 transition ${
+              className={cn(
+                "relative shrink-0 overflow-hidden rounded-md border-2 transition",
                 isScrub
                   ? "border-primary ring-2 ring-primary/30"
                   : isPosition
-                    ? "border-blue-500"
+                    ? MARKER_STYLES.position.filmstripBorder
                     : isAim
-                      ? "border-green-500"
-                      : "border-border hover:border-border/80"
-              }`}
+                      ? MARKER_STYLES.aim.filmstripBorder
+                      : "border-border hover:border-border/80",
+              )}
               title={formatTime(frame.timestampMs)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -236,12 +276,22 @@ export function FrameTimelinePicker({
               {(isPosition || isAim) && (
                 <div className="absolute left-1 top-1 flex gap-0.5">
                   {isPosition && (
-                    <span className="rounded bg-blue-600 px-1 py-0.5 text-[8px] font-medium text-white">
+                    <span
+                      className={cn(
+                        "rounded px-1 py-0.5 text-[10px] font-medium",
+                        MARKER_STYLES.position.badge,
+                      )}
+                    >
                       P
                     </span>
                   )}
                   {isAim && (
-                    <span className="rounded bg-green-600 px-1 py-0.5 text-[8px] font-medium text-white">
+                    <span
+                      className={cn(
+                        "rounded px-1 py-0.5 text-[10px] font-medium",
+                        MARKER_STYLES.aim.badge,
+                      )}
+                    >
                       A
                     </span>
                   )}
@@ -257,25 +307,23 @@ export function FrameTimelinePicker({
 
 function TimelineMarker({
   percent,
-  color,
+  kind,
   label,
 }: {
   percent: number;
-  color: "blue" | "green";
+  kind: MarkerKind;
   label: string;
 }) {
-  const colorClass =
-    color === "blue"
-      ? "border-blue-400 bg-blue-500 text-blue-100"
-      : "border-green-400 bg-green-500 text-green-100";
-
   return (
     <div
       className="absolute top-1/2 z-[5] -translate-x-1/2 -translate-y-1/2"
       style={{ left: `${percent}%` }}
     >
       <div
-        className={`flex h-5 w-5 items-center justify-center rounded-full border text-[8px] font-bold ${colorClass}`}
+        className={cn(
+          "flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold",
+          MARKER_STYLES[kind].marker,
+        )}
       >
         {label[0]}
       </div>
@@ -285,20 +333,17 @@ function TimelineMarker({
 
 function SelectionCard({
   label,
-  accent,
+  kind,
   frame,
   placeholder,
 }: {
   label: string;
-  accent: "blue" | "green";
+  kind: MarkerKind;
   frame: TimelineFrame | null;
   placeholder: string;
 }) {
-  const borderClass =
-    accent === "blue" ? "border-blue-500/30 bg-blue-500/5" : "border-green-500/30 bg-green-500/5";
-
   return (
-    <div className={`rounded-lg border p-3 ${borderClass}`}>
+    <div className={cn("rounded-lg border p-3", MARKER_STYLES[kind].card)}>
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {frame ? (
         <div className="mt-2 flex items-center gap-3">

@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { LineupImage } from "@/components/LineupImage";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { GrenadeType, Map, Side, ThrowMethod } from "@/lib/types";
 import {
@@ -33,8 +35,19 @@ interface LineupFormProps {
 
 export function LineupForm({ maps, initial }: LineupFormProps) {
   const router = useRouter();
+  const formId = useId();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const titleId = `${formId}-title`;
+  const mapId = `${formId}-map`;
+  const grenadeId = `${formId}-grenade`;
+  const sideId = `${formId}-side`;
+  const throwId = `${formId}-throw`;
+  const siteId = `${formId}-site`;
+  const notesId = `${formId}-notes`;
+  const positionImageId = `${formId}-position-image`;
+  const aimImageId = `${formId}-aim-image`;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,21 +82,22 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Title">
-          <input
+        <Field label="Title" htmlFor={titleId}>
+          <Input
+            id={titleId}
             name="title"
             required
             defaultValue={initial?.title}
-            className={inputClass}
             placeholder="Window smoke from T spawn"
           />
         </Field>
-        <Field label="Map">
+        <Field label="Map" htmlFor={mapId}>
           <select
+            id={mapId}
             name="map_id"
             required
             defaultValue={initial?.map_id}
-            className={inputClass}
+            className={fieldClass}
           >
             {maps.map((map) => (
               <option key={map.id} value={map.id}>
@@ -92,12 +106,13 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
             ))}
           </select>
         </Field>
-        <Field label="Grenade type">
+        <Field label="Grenade type" htmlFor={grenadeId}>
           <select
+            id={grenadeId}
             name="grenade_type"
             required
             defaultValue={initial?.grenade_type ?? "smoke"}
-            className={inputClass}
+            className={fieldClass}
           >
             {GRENADE_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -106,12 +121,13 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
             ))}
           </select>
         </Field>
-        <Field label="Side">
+        <Field label="Side" htmlFor={sideId}>
           <select
+            id={sideId}
             name="side"
             required
             defaultValue={initial?.side ?? "T"}
-            className={inputClass}
+            className={fieldClass}
           >
             {(Object.keys(SIDE_LABELS) as Side[]).map((side) => (
               <option key={side} value={side}>
@@ -120,12 +136,13 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
             ))}
           </select>
         </Field>
-        <Field label="Throw method">
+        <Field label="Throw method" htmlFor={throwId}>
           <select
+            id={throwId}
             name="throw_method"
             required
             defaultValue={initial?.throw_method ?? "jump_throw"}
-            className={inputClass}
+            className={fieldClass}
           >
             {THROW_METHODS.map((method) => (
               <option key={method} value={method}>
@@ -134,22 +151,23 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
             ))}
           </select>
         </Field>
-        <Field label="Site (optional)">
-          <input
+        <Field label="Site (optional)" htmlFor={siteId}>
+          <Input
+            id={siteId}
             name="site"
             defaultValue={initial?.site ?? ""}
-            className={inputClass}
             placeholder="A, B, Mid..."
           />
         </Field>
       </div>
 
-      <Field label="Notes (optional)">
+      <Field label="Notes (optional)" htmlFor={notesId}>
         <textarea
+          id={notesId}
           name="notes"
           rows={3}
           defaultValue={initial?.notes ?? ""}
-          className={inputClass}
+          className={cn(fieldClass, "min-h-20 py-2")}
           placeholder="Align crosshair with corner of the box..."
         />
       </Field>
@@ -157,12 +175,14 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         <ImageField
           label="Stand position screenshot"
+          htmlFor={positionImageId}
           name="position_image"
           required={!initial}
           currentUrl={initial?.position_image_url}
         />
         <ImageField
           label="Aim reference screenshot"
+          htmlFor={aimImageId}
           name="aim_image"
           required={!initial}
           currentUrl={initial?.aim_image_url}
@@ -170,7 +190,10 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+        <p
+          className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -179,7 +202,10 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
         <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : initial ? "Update lineup" : "Create lineup"}
         </Button>
-        <Link href="/admin" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+        <Link
+          href="/admin"
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+        >
           Cancel
         </Link>
       </div>
@@ -189,57 +215,63 @@ export function LineupForm({ maps, initial }: LineupFormProps) {
 
 function Field({
   label,
+  htmlFor,
   children,
 }: {
   label: string;
+  htmlFor: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-foreground">{label}</span>
+    <div className="space-y-2">
+      <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-    </label>
+    </div>
   );
 }
 
 function ImageField({
   label,
+  htmlFor,
   name,
   required,
   currentUrl,
 }: {
   label: string;
+  htmlFor: string;
   name: string;
   required?: boolean;
   currentUrl?: string;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-medium text-foreground">{label}</span>
+    <div className="space-y-2">
+      <Label htmlFor={htmlFor}>{label}</Label>
       {currentUrl && (
         <div className="aspect-video overflow-hidden rounded-lg border border-border bg-muted">
           <LineupImage
             src={currentUrl}
             alt="Current screenshot"
             className="object-contain"
+            sizes="(max-width: 1024px) 100vw, 50vw"
           />
         </div>
       )}
-      <input
+      <Input
+        id={htmlFor}
         type="file"
         name={name}
         accept="image/*"
         required={required}
-        className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:text-foreground hover:file:bg-muted/80"
+        className="file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:text-foreground hover:file:bg-muted/80"
       />
       {currentUrl && (
         <p className="text-xs text-muted-foreground">
           Leave empty to keep the current image.
         </p>
       )}
-    </label>
+    </div>
   );
 }
 
-const inputClass =
-  "flex h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50";
+const fieldClass =
+  "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30 dark:disabled:bg-input/80";

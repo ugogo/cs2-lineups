@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LINEUP_CARD_IMAGE_SIZES } from "@/lib/constants";
 import type { Lineup } from "@/lib/types";
 import { GrenadeBadge, SideBadge } from "./Badges";
 import { LineupImage } from "./LineupImage";
@@ -37,7 +38,7 @@ export function LineupCard({
           alt={`${lineup.title} stand position`}
           fill
           className="object-cover transition duration-300 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes={LINEUP_CARD_IMAGE_SIZES}
         />
         <div className="absolute bottom-2 right-2 size-16 overflow-hidden rounded-md ring-2 ring-background/80">
           <LineupImage
@@ -54,7 +55,7 @@ export function LineupCard({
           <h3 className="font-medium leading-snug text-foreground group-hover:text-primary">
             {lineup.title}
           </h3>
-          <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground">
             {throwLabel(lineup.throw_method)}
             {lineup.site ? ` · ${lineup.site}` : ""}
             {mapName ? ` · ${mapName}` : ""}

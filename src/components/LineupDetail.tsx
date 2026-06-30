@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface LineupDetailProps {
@@ -125,7 +124,7 @@ export function LineupDetail({
 
         {lineup.source_type === "twitter" && lineup.source_url && (
           <>
-            <Separator />
+            <div className="h-px bg-border/50" aria-hidden="true" />
             <p className="text-sm text-muted-foreground">
               Source:{" "}
               <a

@@ -1,15 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ImageLightbox } from "@/components/ImageLightbox";
 import { LineupImage } from "@/components/LineupImage";
 import { buttonVariants } from "@/components/ui/button";
+import { LINEUP_DETAIL_IMAGE_SIZES } from "@/lib/constants";
 import { lineupDetailHref } from "@/lib/lineup-filters";
 import type { LineupFilters } from "@/lib/lineup-filters";
 import { cn } from "@/lib/utils";
+
+const ImageLightbox = dynamic(
+  () =>
+    import("@/components/ImageLightbox").then((mod) => ({
+      default: mod.ImageLightbox,
+    })),
+  { ssr: false },
+);
 
 interface LineupBriefingViewerProps {
   title: string;
@@ -77,6 +86,7 @@ export function LineupBriefingViewer({
         alt={positionAlt}
         label="Stand here"
         step={1}
+        priority
         onEnlarge={() =>
           setSingleView({ src: positionSrc, alt: positionAlt, label: "Stand here" })
         }
@@ -118,13 +128,15 @@ export function LineupBriefingViewer({
         )}
       </div>
 
-      <ImageLightbox
-        src={singleView?.src ?? ""}
-        alt={singleView?.alt ?? ""}
-        label={singleView?.label}
-        open={singleView !== null}
-        onClose={() => setSingleView(null)}
-      />
+      {singleView && (
+        <ImageLightbox
+          src={singleView.src}
+          alt={singleView.alt}
+          label={singleView.label}
+          open
+          onClose={() => setSingleView(null)}
+        />
+      )}
     </div>
   );
 }
@@ -134,12 +146,14 @@ function ScreenshotViewport({
   alt,
   label,
   step,
+  priority = false,
   onEnlarge,
 }: {
   src: string;
   alt: string;
   label: string;
   step: number;
+  priority?: boolean;
   onEnlarge: () => void;
 }) {
   return (
@@ -156,7 +170,14 @@ function ScreenshotViewport({
         )}
         aria-label={`Enlarge: ${label}`}
       >
-        <LineupImage src={src} alt={alt} fill className="object-contain" />
+        <LineupImage
+          src={src}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes={LINEUP_DETAIL_IMAGE_SIZES}
+          className="object-contain"
+        />
         <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-md bg-black/70 px-2 py-1 font-mono text-xs text-white/80 opacity-0 transition group-hover:opacity-100 motion-reduce:transition-none">
           <Maximize2 className="size-3" />
           Enlarge

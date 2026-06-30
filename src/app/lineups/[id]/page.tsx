@@ -24,16 +24,17 @@ async function LineupPageContent({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { id } = await params;
-  const resolvedSearchParams = await searchParams;
-  const lineup = await getLineupById(id);
+  const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const [lineup, isAdmin] = await Promise.all([
+    getLineupById(id),
+    isAuthenticated(),
+  ]);
 
   if (!lineup) {
     notFound();
   }
 
   const mapLineups = await getLineupsForMap(lineup.map_id);
-  const isAdmin = await isAuthenticated();
 
   return (
     <LineupDetail
