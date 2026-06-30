@@ -43,10 +43,10 @@ export const MAP_THEMES: Record<string, MapTheme> = {
     accent: "#0d9488",
     imagePath: "/maps/overpass.webp",
   },
-  cache: {
-    gradient: "from-orange-900/50 via-stone-900/80 to-zinc-950",
-    accent: "#f97316",
-    imagePath: "/maps/cache.webp",
+  train: {
+    gradient: "from-orange-800/50 via-zinc-900/80 to-zinc-950",
+    accent: "#ea580c",
+    imagePath: "/maps/train.webp",
   },
 };
 
@@ -56,40 +56,11 @@ const DEFAULT_THEME: MapTheme = {
   imagePath: "",
 };
 
-/** Slugs with a real file at public/maps/{slug}.webp */
-export const MAPS_WITH_POSTER_ASSETS = new Set<string>([
-  "mirage",
-  "inferno",
-  "dust2",
-  "nuke",
-  "ancient",
-  "anubis",
-  "overpass",
-  "cache",
-]);
-
-/** Slugs with a map icon at public/maps/logos/{slug}.png */
-export const MAPS_WITH_LOGO_ASSETS = new Set<string>([
-  "mirage",
-  "inferno",
-  "dust2",
-  "nuke",
-  "ancient",
-  "anubis",
-  "overpass",
-  "cache",
-]);
+/** Slugs with a real file at public/maps/{slug}.webp — add slugs here when assets exist */
+export const MAPS_WITH_POSTER_ASSETS = new Set<string>([]);
 
 export function hasMapPosterAsset(slug: string): boolean {
   return MAPS_WITH_POSTER_ASSETS.has(slug);
-}
-
-export function hasMapLogoAsset(slug: string): boolean {
-  return MAPS_WITH_LOGO_ASSETS.has(slug);
-}
-
-export function getMapLogoPath(slug: string): string {
-  return `/maps/logos/${slug}.png`;
 }
 
 export function getMapTheme(slug: string): MapTheme {
