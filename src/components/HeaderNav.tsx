@@ -108,7 +108,7 @@ function formatMapName(slug: string): string {
     ancient: "Ancient",
     anubis: "Anubis",
     overpass: "Overpass",
-    train: "Train",
+    cache: "Cache",
   };
   return names[slug] ?? slug;
 }

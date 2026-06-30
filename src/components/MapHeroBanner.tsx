@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { MAIN_CONTENT_IMAGE_SIZES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { getMapTheme, hasMapPosterAsset } from "@/lib/map-theme";
+import { getMapTheme, getMapLogoPath, hasMapLogoAsset, hasMapPosterAsset } from "@/lib/map-theme";
 
 interface MapHeroBannerProps {
   mapSlug: string;
@@ -16,6 +16,7 @@ export function MapHeroBanner({
 }: MapHeroBannerProps) {
   const theme = getMapTheme(mapSlug);
   const showImage = hasMapPosterAsset(mapSlug);
+  const showLogo = hasMapLogoAsset(mapSlug);
 
   return (
     <div className="relative overflow-hidden rounded-xl ring-1 ring-border/60">
@@ -36,6 +37,18 @@ export function MapHeroBanner({
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+        {showLogo && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <Image
+              src={getMapLogoPath(mapSlug)}
+              alt=""
+              width={120}
+              height={120}
+              sizes="80px"
+              className="h-14 w-auto opacity-80 drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)] sm:h-16"
+            />
+          </div>
+        )}
         <div className="relative flex h-full flex-col justify-end px-5 pb-4 sm:px-6">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
             de_{mapSlug}

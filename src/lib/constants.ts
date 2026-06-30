@@ -60,9 +60,9 @@ export const MAIN_CONTENT_IMAGE_SIZES =
 export const LINEUP_DETAIL_IMAGE_SIZES =
   "(max-width: 1024px) 100vw, 888px";
 
-/** Map grid poster cards (`sm:grid-cols-2`). */
+/** Map grid poster cards (4 columns at `lg`). */
 export const MAP_CARD_IMAGE_SIZES =
-  "(max-width: 640px) 100vw, 50vw";
+  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
 /** Lineup card thumbnails in responsive grids. */
 export const LINEUP_CARD_IMAGE_SIZES =
@@ -76,5 +76,5 @@ export const ACTIVE_DUTY_MAPS = [
   { name: "Ancient", slug: "ancient", sort_order: 5 },
   { name: "Anubis", slug: "anubis", sort_order: 6 },
   { name: "Overpass", slug: "overpass", sort_order: 7 },
-  { name: "Train", slug: "train", sort_order: 8 },
+  { name: "Cache", slug: "cache", sort_order: 8 },
 ] as const;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { MAP_CARD_IMAGE_SIZES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { getMapTheme, hasMapPosterAsset } from "@/lib/map-theme";
+import { getMapTheme, getMapLogoPath, hasMapLogoAsset, hasMapPosterAsset } from "@/lib/map-theme";
 import type { Map } from "@/lib/types";
 
 interface MapPosterCardProps {
@@ -13,6 +13,7 @@ interface MapPosterCardProps {
 export function MapPosterCard({ map }: MapPosterCardProps) {
   const theme = getMapTheme(map.slug);
   const showImage = hasMapPosterAsset(map.slug);
+  const showLogo = hasMapLogoAsset(map.slug);
   const isEmpty = map.lineup_count === 0;
 
   return (
@@ -42,6 +43,18 @@ export function MapPosterCard({ map }: MapPosterCardProps) {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+        {showLogo && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <Image
+              src={getMapLogoPath(map.slug)}
+              alt=""
+              width={200}
+              height={200}
+              sizes="120px"
+              className="h-16 w-auto opacity-90 drop-shadow-[0_4px_24px_rgba(0,0,0,0.65)] transition duration-300 group-hover:scale-105 group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:h-20 lg:h-24"
+            />
+          </div>
+        )}
         {!isEmpty && (
           <div
             className="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 motion-reduce:transition-none"
