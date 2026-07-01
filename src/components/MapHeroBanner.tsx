@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { MAIN_CONTENT_IMAGE_SIZES } from "@/lib/constants";
+import { MapLogo } from "@/components/MapLogo";
 import { cn } from "@/lib/utils";
-import { getMapTheme, hasMapPosterAsset } from "@/lib/map-theme";
+import { getMapTheme, hasMapLogoAsset, hasMapPosterAsset } from "@/lib/map-theme";
 
 interface MapHeroBannerProps {
   mapSlug: string;
@@ -16,31 +17,42 @@ export function MapHeroBanner({
 }: MapHeroBannerProps) {
   const theme = getMapTheme(mapSlug);
   const showImage = hasMapPosterAsset(mapSlug);
+  const showLogo = hasMapLogoAsset(mapSlug);
 
   return (
     <div className="relative overflow-hidden rounded-xl ring-1 ring-border/60">
       <div className="relative h-28 sm:h-32">
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-r",
-            theme.gradient,
-          )}
-        />
-        {showImage && (
-          <Image
-            src={theme.imagePath}
-            alt=""
-            fill
-            sizes={MAIN_CONTENT_IMAGE_SIZES}
-            className="object-cover opacity-50"
+        <div className="absolute inset-0">
+          <div
+            className={cn(
+              "absolute inset-0 bg-gradient-to-r",
+              theme.gradient,
+            )}
           />
+          {showImage && (
+            <Image
+              src={theme.imagePath}
+              alt=""
+              fill
+              sizes={MAIN_CONTENT_IMAGE_SIZES}
+              className="object-cover opacity-50"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+        </div>
+        {showLogo && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+            <div className="relative aspect-square h-[52%]">
+              <MapLogo
+                slug={mapSlug}
+                sizes="(max-width: 640px) 30vw, 15vw"
+                className="drop-shadow-[0_2px_16px_rgba(0,0,0,0.6)]"
+              />
+            </div>
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-        <div className="relative flex h-full flex-col justify-end px-5 pb-4 sm:px-6">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
-            de_{mapSlug}
-          </p>
-          <div className="mt-0.5 flex flex-wrap items-end gap-3">
+        <div className="relative z-10 flex h-full flex-col justify-end px-5 pb-4 sm:px-6">
+          <div className="flex flex-wrap items-end gap-3">
             <h1 className="font-heading text-2xl uppercase tracking-wider text-white sm:text-3xl">
               {mapName}
             </h1>

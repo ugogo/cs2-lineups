@@ -36,6 +36,7 @@ export function RecentLineupsStrip({ lineups }: RecentLineupsStripProps) {
                   lineup={lineup}
                   mapSlug={lineup.maps.slug}
                   mapName={lineup.maps.name}
+                  accentBorder={false}
                 />
               </div>
             ))}

@@ -12,6 +12,7 @@ interface LineupCardProps {
   mapSlug: string;
   mapName?: string;
   filterQuery?: string;
+  accentBorder?: boolean;
 }
 
 export function LineupCard({
@@ -19,6 +20,7 @@ export function LineupCard({
   mapSlug,
   mapName,
   filterQuery,
+  accentBorder = true,
 }: LineupCardProps) {
   const href = filterQuery
     ? `/lineups/${lineup.id}?${filterQuery}`
@@ -28,8 +30,9 @@ export function LineupCard({
     <Link
       href={href}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border border-border/60 border-l-4 bg-card/50 transition duration-200 hover:border-primary/30 hover:bg-card",
-        GRENADE_BORDER_CLASS[lineup.grenade_type],
+        "group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card/50 transition duration-200 hover:border-primary/30 hover:bg-card",
+        accentBorder && "border-l-4",
+        accentBorder && GRENADE_BORDER_CLASS[lineup.grenade_type],
       )}
     >
       <div className="relative aspect-video overflow-hidden bg-muted/30">

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "cs2-lineups-v1";
+const CACHE_VERSION = "cs2-lineups-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -25,6 +25,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Never intercept navigations — HTML must stay fresh after deploys.
+  if (request.mode === "navigate" || request.destination === "document") {
+    return;
+  }
+
   event.respondWith(
     caches.open(CACHE_VERSION).then(async (cache) => {
       const cached = await cache.match(request);
@@ -35,8 +40,7 @@ self.addEventListener("fetch", (event) => {
       const response = await fetch(request);
       if (
         response.ok &&
-        (request.destination === "document" ||
-          request.destination === "script" ||
+        (request.destination === "script" ||
           request.destination === "style" ||
           request.destination === "image")
       ) {

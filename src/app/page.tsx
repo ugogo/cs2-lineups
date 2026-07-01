@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { MapGrid } from "@/components/MapGrid";
 import { CollectionCard } from "@/components/Collections";
-import { FeaturedLineupBanner } from "@/components/FeaturedLineupBanner";
 import { RecentLineupsStrip } from "@/components/RecentLineupsStrip";
 import { getCollectionsWithCounts, getMapsWithCounts, getRecentLineups } from "@/lib/queries";
 import { ACTIVE_DUTY_MAPS } from "@/lib/constants";
@@ -14,8 +13,6 @@ export default async function HomePage() {
   ]);
 
   const totalLineups = maps.reduce((sum, map) => sum + map.lineup_count, 0);
-  const featured = recentLineups[0] ?? null;
-  const stripLineups = featured ? recentLineups.slice(1) : recentLineups;
 
   return (
     <div className="space-y-10">
@@ -31,8 +28,6 @@ export default async function HomePage() {
           {totalLineups === 1 ? "" : "s"}
         </p>
       </header>
-
-      {featured && <FeaturedLineupBanner lineup={featured} />}
 
       <MapGrid maps={maps} />
 
@@ -71,10 +66,10 @@ export default async function HomePage() {
         </>
       )}
 
-      {stripLineups.length > 0 && (
+      {recentLineups.length > 0 && (
         <>
           <div className="h-px bg-border/50" aria-hidden="true" />
-          <RecentLineupsStrip lineups={stripLineups} />
+          <RecentLineupsStrip lineups={recentLineups} />
         </>
       )}
     </div>

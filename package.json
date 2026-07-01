@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate-icons": "node scripts/generate-pwa-icons.mjs"
+    "generate-icons": "node scripts/generate-pwa-icons.mjs",
+    "fetch-map-posters": "node scripts/fetch-map-posters.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

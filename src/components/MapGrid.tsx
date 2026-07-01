@@ -14,7 +14,7 @@ export function MapGrid({ maps }: MapGridProps) {
   });
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
       {sorted.map((map) => (
         <MapPosterCard key={map.id} map={map} />
       ))}
